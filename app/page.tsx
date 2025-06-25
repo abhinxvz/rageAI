@@ -5,6 +5,7 @@ import { ArrowRight, CheckCircle2, AppWindowIcon, SmileIcon, LeafyGreenIcon } fr
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { TextHoverEffectDemo } from "@/components/text-hover-effect-demo"
+import { CardSpotlight } from "@/components/ui/card-spotlight"
 
 export default function Home() {
   return (
@@ -155,7 +156,7 @@ export default function Home() {
             transition={{ duration: 1 }}
             className="mx-auto max-w-3xl space-y-8"
           >
-            <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
+            <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-5xl lg:text-7xl">
               Meet Rage AI: Your Smartest Teammate
             </h1>
             <p className="mx-auto max-w-2xl text-muted text-gray-400 sm:text-xl">
@@ -227,27 +228,35 @@ export default function Home() {
       {/* CTA Section */}
       <section className="relative z-10 border-t border-white/10 bg-black py-24">
         <div className="container px-4">
-          <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-gradient-to-r from-green-950/50 to-emerald-950/50 p-8 text-center backdrop-blur-sm md:p-12 lg:p-16">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Ready to Meet Your New Teammate?</h2>
-            <p className="mx-auto mt-4 max-w-xl text-gray-400">Let's Build the Future of AI Together</p>
-            <ul className="mx-auto mt-8 flex max-w-xl flex-col gap-4 text-left">
-              <li className="flex items-center space-x-3">
-                <CheckCircle2 className="h-5 w-5 text-green-400" />
-                <span>No setup required - just start talking</span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <CheckCircle2 className="h-5 w-5 text-green-400" />
-                <span>Works with your existing apps</span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <CheckCircle2 className="h-5 w-5 text-green-400" />
-                <span>Early access to new features</span>
-              </li>
-            </ul>
-            <Button className="mt-8 bg-gradient-to-r from-green-400 to-emerald-500 text-lg text-black hover:from-green-500 hover:to-emerald-600">
-              JOIN WAIT LIST
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+          <div className="flex justify-center">
+            <CardSpotlight className="group h-auto w-full max-w-5xl p-8">
+              <div className="relative z-20 flex flex-col items-start">
+                <h2 className="text-3xl font-bold tracking-tighter text-white sm:text-4xl">
+                  Ready to Meet Your New Teammate?
+                </h2>
+                <p className="mt-4 text-lg text-neutral-200">Let's Build the Future of AI Together</p>
+                <ul className="mt-8 space-y-4">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-green-400" />
+                    <span className="text-base text-white">No setup required - just start talking</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-green-400" />
+                    <span className="text-base text-white">Works with your existing apps</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-green-400" />
+                    <span className="text-base text-white">Early access to new features</span>
+                  </li>
+                </ul>
+                <div className="mt-8 self-center">
+                  <Button className="bg-gradient-to-r from-green-400 to-emerald-500 text-lg text-black hover:from-green-500 hover:to-emerald-600">
+                    JOIN WAIT LIST
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+            </CardSpotlight>
           </div>
         </div>
       </section>

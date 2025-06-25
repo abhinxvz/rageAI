@@ -1,5 +1,5 @@
 "use client"
-import { useRef, useEffect, useState } from "react"
+import { useRef, useState, MouseEvent } from "react"
 import { motion } from "framer-motion"
 
 export const TextHoverEffect = ({
@@ -10,21 +10,20 @@ export const TextHoverEffect = ({
   duration?: number
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
-  const [cursor, setCursor] = useState({ x: 0, y: 0 })
   const [hovered, setHovered] = useState(false)
   const [maskPosition, setMaskPosition] = useState({ cx: "50%", cy: "50%" })
 
-  useEffect(() => {
-    if (svgRef.current && cursor.x !== null && cursor.y !== null) {
+  const handleMouseMove = (e: MouseEvent<SVGSVGElement>) => {
+    if (svgRef.current) {
       const svgRect = svgRef.current.getBoundingClientRect()
-      const cxPercentage = ((cursor.x - svgRect.left) / svgRect.width) * 100
-      const cyPercentage = ((cursor.y - svgRect.top) / svgRect.height) * 100
+      const cxPercentage = ((e.clientX - svgRect.left) / svgRect.width) * 100
+      const cyPercentage = ((e.clientY - svgRect.top) / svgRect.height) * 100
       setMaskPosition({
         cx: `${cxPercentage}%`,
         cy: `${cyPercentage}%`,
       })
     }
-  }, [cursor])
+  }
 
   return (
     <svg
@@ -35,7 +34,7 @@ export const TextHoverEffect = ({
       xmlns="http://www.w3.org/2000/svg"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onMouseMove={(e) => setCursor({ x: e.clientX, y: e.clientY })}
+      onMouseMove={handleMouseMove}
       className="select-none"
     >
       <defs>
