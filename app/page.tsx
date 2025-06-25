@@ -166,7 +166,7 @@ export default function Home() {
             <div className="flex justify-center space-x-4">
               <Button className="bg-gradient-to-r from-green-400 to-emerald-500 text-lg text-black hover:from-green-500 hover:to-emerald-600">
                 JOIN WAIT LIST
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
               </Button>
             </div>
           </motion.div>
@@ -181,46 +181,49 @@ export default function Home() {
             <p className="mt-4 text-gray-400">Experience work automation that actually works for you</p>
           </div>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-              className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-colors hover:border-green-400/50"
-            >
-              <AppWindowIcon className="mb-4 h-12 w-12 text-green-400" />
-              <h3 className="mb-2 text-xl font-bold">App Integration</h3>
-              <p className="text-gray-400">
-                Connects with Gmail, Slack, Notion, and more. No more tab switching or context switching.
-              </p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-colors hover:border-emerald-400/50"
-            >
-              <SmileIcon className="mb-4 h-12 w-12 text-emerald-400" />
-              <h3 className="mb-2 text-xl font-bold">Plain English Commands</h3>
-              <p className="text-gray-400">
-                Just chat like you're talking to a teammate. Rage AI figures out what apps to use and what steps to
-                take.
-              </p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-colors hover:border-green-400/50"
-            >
-              <LeafyGreenIcon className="mb-4 h-12 w-12 text-green-400" />
-              <h3 className="mb-2 text-xl font-bold">Friction-Free Work</h3>
-              <p className="text-gray-400">
-                Less about building workflows, more about removing friction. A single space where things just get done.
-              </p>
-            </motion.div>
+            <CardSpotlight className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-colors hover:border-green-400/50 h-full">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <AppWindowIcon className="mb-4 h-12 w-12 text-green-400" />
+                <h3 className="mb-2 text-xl font-bold">App Integration</h3>
+                <p className="text-gray-400">
+                  Connects with Gmail, Slack, Notion, and more. No more tab switching or context switching.
+                </p>
+              </motion.div>
+            </CardSpotlight>
+            <CardSpotlight className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-colors hover:border-emerald-400/50 h-full">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                viewport={{ once: true }}
+              >
+                <SmileIcon className="mb-4 h-12 w-12 text-emerald-400" />
+                <h3 className="mb-2 text-xl font-bold">Plain English Commands</h3>
+                <p className="text-gray-400">
+                  Just chat like you're talking to a teammate. Rage AI figures out what apps to use and what steps to
+                  take.
+                </p>
+              </motion.div>
+            </CardSpotlight>
+            <CardSpotlight className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-colors hover:border-green-400/50 h-full">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                viewport={{ once: true }}
+              >
+                <LeafyGreenIcon className="mb-4 h-12 w-12 text-green-400" />
+                <h3 className="mb-2 text-xl font-bold">Friction-Free Work</h3>
+                <p className="text-gray-400">
+                  Less about building workflows, more about removing friction. A single space where things just get done.
+                </p>
+              </motion.div>
+            </CardSpotlight>
           </div>
         </div>
       </section>
@@ -252,7 +255,7 @@ export default function Home() {
                 <div className="mt-8 self-center">
                   <Button className="bg-gradient-to-r from-green-400 to-emerald-500 text-lg text-black hover:from-green-500 hover:to-emerald-600">
                     JOIN WAIT LIST
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                   </Button>
                 </div>
               </div>
@@ -269,66 +272,67 @@ export default function Home() {
             <p className="mt-4 text-gray-400">Everything you need to know about Rage AI</p>
           </div>
           <div className="mx-auto max-w-3xl space-y-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-              className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
-            >
-              <h3 className="mb-3 text-xl font-bold text-green-400">What is Rage AI?</h3>
-              <p className="text-gray-400">
-                Rage AI is your smartest teammate. You just tell it what you need in plain English, and it gets it done.
-                Whether it's drafting an email, pulling info from Notion, summarizing a doc, scheduling something on
-                your calendar, or updating a spreadsheet, Rage AI talks to all your apps and takes care of the busywork
-                for you.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
-            >
-              <h3 className="mb-3 text-xl font-bold text-green-400">How does Rage AI work?</h3>
-              <p className="text-gray-400">
-                Like you're chatting with a teammate. It figures out what apps to use, what steps to take, and does the
-                work for you. Whether it's pulling info from your inbox, updating a Notion doc, or creating a chart,
-                Rage AI handles it all seamlessly.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
-            >
-              <h3 className="mb-3 text-xl font-bold text-green-400">What makes Rage AI different?</h3>
-              <p className="text-gray-400">
-                It's about changing how you interact with your work. Instead of jumping between tools or relying on
-                rigid setups, Rage AI becomes a single space where things just get done. It's less about building
-                workflows, and more about removing friction. No more tab switching, no more context switching - just
-                talk to Rage AI and move on.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
-            >
-              <h3 className="mb-3 text-xl font-bold text-green-400">Which apps does Rage AI integrate with?</h3>
-              <p className="text-gray-400">
-                Rage AI works with Gmail, Slack, Notion, Google Calendar, spreadsheet applications, and many more. The
-                integration list is constantly growing to support your entire workflow ecosystem.
-              </p>
-            </motion.div>
+            <CardSpotlight className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm h-full">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <h3 className="mb-3 text-xl font-bold text-green-400">What is Rage AI?</h3>
+                <p className="text-gray-400">
+                  Rage AI is your smartest teammate. You just tell it what you need in plain English, and it gets it done.
+                  Whether it's drafting an email, pulling info from Notion, summarizing a doc, scheduling something on
+                  your calendar, or updating a spreadsheet, Rage AI talks to all your apps and takes care of the busywork
+                  for you.
+                </p>
+              </motion.div>
+            </CardSpotlight>
+            <CardSpotlight className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm h-full">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                viewport={{ once: true }}
+              >
+                <h3 className="mb-3 text-xl font-bold text-green-400">How does Rage AI work?</h3>
+                <p className="text-gray-400">
+                  Like you're chatting with a teammate. It figures out what apps to use, what steps to take, and does the
+                  work for you. Whether it's pulling info from your inbox, updating a Notion doc, or creating a chart,
+                  Rage AI handles it all seamlessly.
+                </p>
+              </motion.div>
+            </CardSpotlight>
+            <CardSpotlight className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm h-full">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                viewport={{ once: true }}
+              >
+                <h3 className="mb-3 text-xl font-bold text-green-400">What makes Rage AI different?</h3>
+                <p className="text-gray-400">
+                  It's about changing how you interact with your work. Instead of jumping between tools or relying on
+                  rigid setups, Rage AI becomes a single space where things just get done. It's less about building
+                  workflows, and more about removing friction. No more tab switching, no more context switching - just
+                  talk to Rage AI and move on.
+                </p>
+              </motion.div>
+            </CardSpotlight>
+            <CardSpotlight className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm h-full">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                viewport={{ once: true }}
+              >
+                <h3 className="mb-3 text-xl font-bold text-green-400">Which apps does Rage AI integrate with?</h3>
+                <p className="text-gray-400">
+                  Rage AI works with Gmail, Slack, Notion, Google Calendar, spreadsheet applications, and many more. The
+                  integration list is constantly growing to support your entire workflow ecosystem.
+                </p>
+              </motion.div>
+            </CardSpotlight>
           </div>
         </div>
       </section>
