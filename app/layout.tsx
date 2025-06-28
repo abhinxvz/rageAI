@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Head from "next/head";
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: 'Rage AI',
@@ -18,7 +19,7 @@ export default function RootLayout({
       <Head>
         <link rel="icon" href="/favicon.ico" type="image/x-icon" />
       </Head>
-      <body>{children}</body>
+      <body>{children}<Toaster /></body>
     </html>
   )
 }
