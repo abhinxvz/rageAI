@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import { BackgroundGradient } from "@/components/ui/background-gradient"
+import { SparklesCore } from "@/components/ui/sparkles"
 
 export default function Home() {
   const { toast } = useToast();
@@ -257,7 +258,20 @@ export default function Home() {
               className="mx-auto max-w-3xl space-y-8"
             >
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-5xl lg:text-7xl">
-                Meet Rage AI: Your Smartest Teammate
+                <span className="relative inline-block">
+                  Meet Rage AI: Your Smartest Teammate
+                  <span className="absolute inset-0 pointer-events-none">
+                    <SparklesCore
+                      className="w-full h-full"
+                      particleColor="#fff"
+                      particleDensity={40}
+                      minSize={1}
+                      maxSize={2}
+                      speed={2}
+                      background="transparent"
+                    />
+                  </span>
+                </span>
               </h1>
               <p className="mx-auto max-w-2xl text-muted text-gray-400 sm:text-xl">
                 Just tell Rage AI what you need in plain English, and it gets it done. From drafting emails to updating
