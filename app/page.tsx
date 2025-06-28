@@ -259,7 +259,9 @@ export default function Home() {
             >
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-5xl lg:text-7xl">
                 <span className="relative inline-block">
-                  Meet Rage AI: Your Smartest Teammate
+                  <span className="text-white">
+                    Meet <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">Rage AI</span>: Your Smartest Teammate
+                  </span>
                   <span className="absolute inset-0 pointer-events-none">
                     <SparklesCore
                       className="w-full h-full"
