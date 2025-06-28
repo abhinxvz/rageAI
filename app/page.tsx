@@ -464,7 +464,27 @@ export default function Home() {
             © {new Date().getFullYear()} Rage AI. Made by Abhinav.
           </p>
           <div className="flex space-x-6">
-            <Link className="text-sm text-gray-400 hover:text-cyan-400" href="#"></Link>
+            <Link
+              className="group text-sm text-gray-400 hover:text-emerald-400 flex items-center gap-1 transition-colors"
+              href="https://x.com/rag3AI"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Rage AI on X"
+            >
+              {/* Official X (Twitter) logo SVG */}
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 120 120"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="transition-colors duration-200 text-gray-400 group-hover:text-emerald-400"
+              >
+                <rect width="120" height="120" rx="24" fill="currentColor" />
+                <path d="M85.5 34H74.7L60 54.1L45.3 34H34.5L54.7 61.1L34 86H44.8L60 67.1L75.2 86H86L65.3 61.1L85.5 34ZM60 62.7L48.6 48.1H71.4L60 62.7Z" fill="black"/>
+              </svg>
+              @rag3AI
+            </Link>
           </div>
         </div>
       </footer>
