@@ -126,15 +126,15 @@ export default function Home() {
 
         {/* Navigation */}
         <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-black/50 backdrop-blur-xl">
-          <div className="container flex h-16 items-center justify-between px-2 sm:px-4 flex-col sm:flex-row gap-2 sm:gap-0">
+          <div className="container flex h-16 items-center justify-between px-4">
             <Link className="flex items-center space-x-2 font-bold" href="/">
               <img src="/logo.png" alt="Rage AI Logo" className="h-8 w-8" />
               <div className="flex flex-col">
-                <span className="text-base sm:text-lg">Rage AI</span>
-                <span className="text-xs text-gray-400 font-normal leading-tight">Your One Way solution for every task</span>
+                <span>Rage AI</span>
+                <span className="text-xs text-gray-400 font-normal">Your One Way solution for every task</span>
               </div>
             </Link>
-            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto justify-between sm:justify-end">
+            <div className="flex items-center space-x-4">
               <span className="hidden text-sm text-green-400 sm:block">Coming Soon</span>
               <JoinWaitListButton />
             </div>
@@ -142,7 +142,7 @@ export default function Home() {
         </header>
 
         {/* Hero Section */}
-        <section className="relative flex flex-col min-h-screen items-center justify-center overflow-hidden pt-20 sm:pt-16 px-2 sm:px-0">
+        <section className="relative flex min-h-screen items-center justify-center overflow-hidden pt-16">
           {/* Animated Elements */}
           <div className="absolute inset-0 overflow-hidden">
             {/* Curved Lines */}
@@ -261,14 +261,14 @@ export default function Home() {
           </div>
 
           {/* Content */}
-          <div className="container relative z-[3] px-2 sm:px-4 text-center">
+          <div className="container relative z-[3] px-4 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1 }}
-              className="mx-auto max-w-xl sm:max-w-3xl space-y-6 sm:space-y-8"
+              className="mx-auto max-w-3xl space-y-8"
             >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter font-sans">
+              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-5xl lg:text-7xl font-sans">
                 <span className="relative inline-block">
                   <span className="text-white">
                     Meet <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">Rage AI</span>: Your Smartest Teammate
@@ -286,11 +286,11 @@ export default function Home() {
                   </span>
                 </span>
               </h1>
-              <p className="mx-auto max-w-xs sm:max-w-2xl text-gray-400 text-base sm:text-xl">
+              <p className="mx-auto max-w-2xl text-muted text-gray-400 sm:text-xl">
                 Just tell Rage AI what you need in plain English, and it gets it done. From drafting emails to updating
                 spreadsheets, Rage AI talks to all your apps and takes care of the busywork for you.
               </p>
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:space-x-4">
+              <div className="flex justify-center space-x-4">
                 <JoinWaitListButton />
               </div>
             </motion.div>
@@ -298,13 +298,13 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="relative z-10 border-t border-white/10 bg-black py-12 sm:py-24 px-2 sm:px-0">
-          <div className="container px-2 sm:px-4">
-            <div className="mb-10 sm:mb-16 text-center">
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Why Choose <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">Rage AI</span>?</h2>
-              <p className="mt-2 sm:mt-4 text-gray-400 text-sm sm:text-base">Experience work automation that actually works for you</p>
+        <section id="features" className="relative z-10 border-t border-white/10 bg-black py-24">
+          <div className="container px-4">
+            <div className="mb-16 text-center">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Why Choose <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">Rage AI</span>?</h2>
+              <p className="mt-4 text-gray-400">Experience work automation that actually works for you</p>
             </div>
-            <div className="grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               <CardSpotlight className="group rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-colors hover:border-green-400/50 h-full">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -353,30 +353,30 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="relative z-10 border-t border-white/10 bg-black py-12 sm:py-24 px-2 sm:px-0">
-          <div className="container px-2 sm:px-4">
-            <div className="flex flex-col items-center justify-center sm:flex-row sm:justify-center">
-              <CardSpotlight className="group h-auto w-full max-w-xl sm:max-w-5xl p-4 sm:p-8">
+        <section className="relative z-10 border-t border-white/10 bg-black py-24">
+          <div className="container px-4">
+            <div className="flex justify-center">
+              <CardSpotlight className="group h-auto w-full max-w-5xl p-8">
                 <div className="relative z-20 flex flex-col items-start">
-                  <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter text-white sm:text-4xl">
+                  <h2 className="text-3xl font-bold tracking-tighter text-white sm:text-4xl">
                     Ready to Meet Your <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">New Teammate</span>?
                   </h2>
-                  <p className="mt-2 sm:mt-4 text-base sm:text-lg text-neutral-200">Let's Build the Future of AI Together</p>
-                  <ul className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
+                  <p className="mt-4 text-lg text-neutral-200">Let's Build the Future of AI Together</p>
+                  <ul className="mt-8 space-y-4">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-5 w-5 shrink-0 text-green-400" />
-                      <span className="text-sm sm:text-base text-white">No setup required - just start talking</span>
+                      <span className="text-base text-white">No setup required - just start talking</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-5 w-5 shrink-0 text-green-400" />
-                      <span className="text-sm sm:text-base text-white">Works with your existing apps</span>
+                      <span className="text-base text-white">Works with your existing apps</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-5 w-5 shrink-0 text-green-400" />
-                      <span className="text-sm sm:text-base text-white">Early access to new features</span>
+                      <span className="text-base text-white">Early access to new features</span>
                     </li>
                   </ul>
-                  <div className="mt-6 sm:mt-8 self-center w-full">
+                  <div className="mt-8 self-center">
                     <JoinWaitListButton />
                   </div>
                 </div>
@@ -386,13 +386,13 @@ export default function Home() {
         </section>
 
         {/* FAQ Section */}
-        <section className="relative z-10 border-t border-white/10 bg-black py-12 sm:py-24 px-2 sm:px-0">
-          <div className="container px-2 sm:px-4">
-            <div className="mb-10 sm:mb-16 text-center">
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Frequently Asked Questions</h2>
-              <p className="mt-2 sm:mt-4 text-gray-400 text-sm sm:text-base">Everything you need to know about Rage AI</p>
+        <section className="relative z-10 border-t border-white/10 bg-black py-24">
+          <div className="container px-4">
+            <div className="mb-16 text-center">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Frequently Asked Questions</h2>
+              <p className="mt-4 text-gray-400">Everything you need to know about Rage AI</p>
             </div>
-            <div className="mx-auto max-w-xl sm:max-w-3xl space-y-6 sm:space-y-8">
+            <div className="mx-auto max-w-3xl space-y-8">
               <CardSpotlight className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm h-full">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -465,18 +465,18 @@ export default function Home() {
       </Dialog>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 bg-black py-6 sm:py-8 px-2 sm:px-0">
-        <div className="container flex flex-col items-center justify-between space-y-4 px-2 sm:px-4 md:flex-row md:space-y-0 text-center md:text-left">
-          <div className="flex items-center space-x-2 mb-2 md:mb-0">
+      <footer className="border-t border-white/10 bg-black py-8">
+        <div className="container flex flex-col items-center justify-between space-y-4 px-4 md:flex-row md:space-y-0">
+          <div className="flex items-center space-x-2">
             <img src="/logo.png" alt="Rage AI Logo" className="h-6 w-6" />
-            <span className="font-bold text-base">Rage AI</span>
+            <span className="font-bold">Rage AI</span>
           </div>
-          <p className="text-xs sm:text-sm text-gray-400 font-sans font-bold">
+          <p className="text-sm text-gray-400 font-sans font-bold text-center">
             © {new Date().getFullYear()} Rage AI. Made by Abhinav.
           </p>
-          <div className="flex space-x-4 sm:space-x-6 justify-center md:justify-end w-full md:w-auto">
+          <div className="flex space-x-6">
             <Link
-              className="group text-xs sm:text-sm text-gray-400 hover:text-emerald-400 flex items-center gap-1 transition-colors"
+              className="group text-sm text-gray-400 hover:text-emerald-400 flex items-center gap-1 transition-colors"
               href="https://x.com/rag3AI"
               target="_blank"
               rel="noopener noreferrer"
