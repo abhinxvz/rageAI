@@ -1,0 +1,68 @@
+
+import { NextRequest } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { ChatService } from '@/services/chat.service'
+import { ConversationService } from '@/services/conversation.service'
+
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return new Response('Unauthorized', { status: 401 })
+    }
+
+
+    const { messages, threadId, model } = await req.json()
+    if (!Array.isArray(messages)) {
+      return new Response('Invalid message format', { status: 400 })
+    }
+
+    const apiKey = req.headers.get("x-model-api-key") as string
+
+    const conversationService = new ConversationService()
+    const chatService = new ChatService({ name: session?.user?.name as string, email: session?.user?.email, id: session?.userId as string })
+
+    try {
+      await conversationService.ensureConversation(threadId, session.userId as string, messages, model, apiKey)
+    } catch (error: any) {
+      if (error?.code === 'DELETED' || error?.message === 'CONVERSATION_DELETED') {
+        return new Response('Conversation not found', { status: 404 })
+      }
+      throw error
+    }
+
+    await conversationService.saveUserMessage(threadId, messages[messages.length - 1]?.content || '')
+    await conversationService.bringConversationToTop(threadId);
+
+    const stream = await chatService.processChat({
+      messages,
+      threadId,
+      model,
+      apiKey
+    })
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    })
+
+  } catch (error: any) {
+    console.error('Chat API error:', error)
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    })
+    return new Response(JSON.stringify({ 
+      error: error.message || 'Internal Server Error',
+      details: error.toString()
+    }), { 
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
+}
