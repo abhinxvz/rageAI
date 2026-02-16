@@ -36,7 +36,15 @@ Example: To send an email to john@example.com with subject "Meeting" and message
 
   async _call(input: z.infer<typeof this.schema>): Promise<string> {
     try {
-      const result = await this.gmailTool._call(input);
+      // Convert string inputs to arrays as expected by LangChain Gmail tool
+      const gmailInput = {
+        message: input.message,
+        subject: input.subject,
+        to: [input.to],
+        cc: input.cc ? input.cc.split(',').map(e => e.trim()) : undefined,
+        bcc: input.bcc ? input.bcc.split(',').map(e => e.trim()) : undefined,
+      };
+      const result = await this.gmailTool._call(gmailInput);
       return `✓ Email sent successfully to ${input.to} with subject "${input.subject}"`;
     } catch (error: any) {
       return `✗ Failed to send email: ${error.message}`;
