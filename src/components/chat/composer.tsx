@@ -5,14 +5,14 @@ import { Textarea } from "../ui/textarea"
 import { ModelSelector } from "./model-selector"
 import { PillButton } from "../pill-button"
 import { MessageCounter } from "./message-counter"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useCallback } from "react"
 import { cn } from "@/lib/utils"
 
 interface Composer {
     input: string,
     inputRef: React.RefObject<HTMLTextAreaElement | null>,
     isMessageLimitReached: boolean,
-    isLoading?: boolean, 
+    isLoading?: boolean,
     setInput: (value: string) => void,
     handleSubmit: (value: string) => void,
     maxUserMessagesPerChat: number,
@@ -23,23 +23,23 @@ interface Composer {
     userMessageCount: number
 }
 
-export function Composer({ 
-    input, 
-    inputRef, 
-    isMessageLimitReached, 
+export function Composer({
+    input,
+    inputRef,
+    isMessageLimitReached,
     isLoading = false,
-    setInput, 
-    handleSubmit, 
-    maxUserMessagesPerChat, 
-    model, 
-    setModel, 
-    keys, 
-    openModal, 
-    userMessageCount 
+    setInput,
+    handleSubmit,
+    maxUserMessagesPerChat,
+    model,
+    setModel,
+    keys,
+    openModal,
+    userMessageCount
 }: Composer) {
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-    const adjustTextareaHeight = () => {
+    const adjustTextareaHeight = useCallback(() => {
         const textarea = textareaRef.current || inputRef?.current
         if (textarea) {
             textarea.style.height = 'auto'
@@ -47,11 +47,11 @@ export function Composer({
             const maxHeight = 144
             textarea.style.height = `${Math.min(scrollHeight, maxHeight)}px`
         }
-    }
+    }, [inputRef])
 
     useEffect(() => {
         adjustTextareaHeight()
-    }, [input])
+    }, [input, adjustTextareaHeight])
 
     useEffect(() => {
         if (inputRef && textareaRef.current) {
@@ -81,7 +81,7 @@ export function Composer({
             <div className="relative w-full">
                 {/* Glow effect */}
                 <div className="absolute -inset-1 bg-gradient-to-r from-[#1072f8]/20 via-[#3b8fff]/20 to-[#1072f8]/20 rounded-3xl blur-xl opacity-50" />
-                
+
                 {/* Main container */}
                 <div className="relative w-full rounded-2xl border border-white/10 bg-[#0a0a0a]/90 backdrop-blur-2xl shadow-2xl overflow-hidden">
                     {/* Input area */}
@@ -96,7 +96,7 @@ export function Composer({
                             }}
                             onKeyDown={handleKeyDown}
                             placeholder={
-                                isMessageLimitReached 
+                                isMessageLimitReached
                                     ? `Message limit reached`
                                     : isLoading
                                         ? "Processing..."
@@ -108,9 +108,9 @@ export function Composer({
                                 "flex-1 min-h-[48px] resize-none border-0 bg-transparent text-white text-[15px] placeholder:text-gray-500 focus-visible:ring-0 disabled:opacity-50 disabled:cursor-not-allowed",
                                 "scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
                             )}
-                            style={{ 
-                                height: '48px', 
-                                maxHeight: '160px', 
+                            style={{
+                                height: '48px',
+                                maxHeight: '160px',
                                 overflowY: input.split('\n').length > 6 ? 'auto' : 'hidden'
                             }}
                         />
@@ -139,7 +139,7 @@ export function Composer({
                             model={model}
                             onChange={setModel}
                             keys={keys}
-                            disabled={isLoading} 
+                            disabled={isLoading}
                         />
 
                         <PillButton
@@ -147,7 +147,7 @@ export function Composer({
                             onClick={openModal}
                             icon={Key}
                             label="API Keys"
-                            disabled={isLoading} 
+                            disabled={isLoading}
                         />
 
                         <MessageCounter
@@ -159,8 +159,8 @@ export function Composer({
                         <div className="flex-1" />
 
                         <span className="text-[11px] text-gray-600 font-medium">
-                            {isLoading 
-                                ? "⚡ Processing..." 
+                            {isLoading
+                                ? "⚡ Processing..."
                                 : "↵ Send • ⇧↵ New line"
                             }
                         </span>

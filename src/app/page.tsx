@@ -18,15 +18,15 @@ export default function LandingPage() {
   const faqs = [
     {
       question: "What is Rage AI?",
-      answer: "Rage AI is your smartest teammate. You just tell it what you need in plain English, and it gets it done. Whether it's drafting an email in Gmail, creating GitHub repos with files and issues, updating a Notion database, or scheduling something on Google Calendar, Rage AI connects to your tools and takes care of the busywork for you."
+      answer: "Rage AI is your smartest teammate. You just tell it what you need in plain English, and it gets it done. Whether it&apos;s drafting an email in Gmail, creating GitHub repos with files and issues, updating a Notion database, or scheduling something on Google Calendar, Rage AI connects to your tools and takes care of the busywork for you."
     },
     {
       question: "How does Rage AI work?",
-      answer: "Like you're chatting with a teammate. It figures out what to do and handles your apps automatically. Whether it's pulling info from Gmail, creating GitHub PRs and managing code files, updating a Notion page, or scheduling in Calendar, Rage AI handles it all seamlessly."
+      answer: "Like you&apos;re chatting with a teammate. It figures out what to do and handles your apps automatically. Whether it&apos;s pulling info from Gmail, creating GitHub PRs and managing code files, updating a Notion page, or scheduling in Calendar, Rage AI handles it all seamlessly."
     },
     {
       question: "What makes Rage AI different?",
-      answer: "It's about changing how you interact with your work. Instead of jumping between Gmail, Calendar, Docs, GitHub, and Notion or relying on rigid setups, Rage AI becomes a single space where things just get done. It's less about building workflows, and more about removing friction."
+      answer: "It&apos;s about changing how you interact with your work. Instead of jumping between Gmail, Calendar, Docs, GitHub, and Notion or relying on rigid setups, Rage AI becomes a single space where things just get done. It&apos;s less about building workflows, and more about removing friction."
     },
     {
       question: "Which apps does Rage AI integrate with?",
@@ -153,7 +153,7 @@ export default function LandingPage() {
                   <SmileIcon className="mb-4 h-12 w-12 text-[#1072f8]" />
                   <h3 className="mb-2 text-xl font-bold font-montserrat">Plain English Commands</h3>
                   <p className="text-gray-400 font-montserrat">
-                    Just chat like you're talking to a teammate. Rage AI figures out what to do and handles your Google apps automatically.
+                    Just chat like you&apos;re talking to a teammate. Rage AI figures out what to do and handles your Google apps automatically.
                   </p>
                 </motion.div>
               </CardSpotlight>
@@ -185,7 +185,7 @@ export default function LandingPage() {
                   <h2 className="text-3xl font-bold tracking-tighter text-white sm:text-4xl font-montserrat">
                     Ready to Meet Your <span className="bg-gradient-to-r from-[#1072f8] to-[#0052cc] bg-clip-text text-transparent">New Teammate</span>?
                   </h2>
-                  <p className="mt-4 text-lg text-neutral-200 font-montserrat">Let's Build the Future of AI Together</p>
+                  <p className="mt-4 text-lg text-neutral-200 font-montserrat">Let&apos;s Build the Future of AI Together</p>
                   <ul className="mt-8 space-y-4">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-5 w-5 shrink-0 text-[#1072f8]" />
