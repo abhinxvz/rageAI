@@ -56,6 +56,8 @@ function Button({
       icon: "p-2 w-8 h-8"
     }
 
+    const currentSize = size || "default"
+
     return (
       <button
         data-slot="button"
@@ -71,7 +73,7 @@ function Button({
         </span>
         <div className={cn(
           "relative flex space-x-2 items-center justify-center z-10 rounded-full bg-zinc-950 ring-1 ring-white/10",
-          sizeClasses[size]
+          sizeClasses[currentSize]
         )}>
           {props.children}
         </div>
