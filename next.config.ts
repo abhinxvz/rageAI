@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
     // We run type checking separately
     ignoreBuildErrors: false,
   },
+  experimental: {
+    // Optimize memory usage
+    workerThreads: false,
+    cpus: 1,
+  },
 };
 
 export default nextConfig;
