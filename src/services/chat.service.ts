@@ -197,7 +197,7 @@ export class ChatService {
             try {
                 const twitterMetadata = await this.appPermissionService.getAppMetadata(this.user.id, 'twitter')
                 const twitterUserId = twitterMetadata?.twitterUserId || this.user.id
-                
+
                 const twitterTools = createTwitterTools({
                     bearerToken: twitterAccessToken as string,
                     userId: twitterUserId
@@ -214,7 +214,7 @@ export class ChatService {
             try {
                 const instagramMetadata = await this.appPermissionService.getAppMetadata(this.user.id, 'instagram')
                 const instagramAccountId = instagramMetadata?.instagramAccountId
-                
+
                 if (instagramAccountId) {
                     const { createInstagramTools } = await import('@/lib/instagram-langchain-tools')
                     const instagramTools = createInstagramTools({
@@ -316,7 +316,7 @@ export class ChatService {
         console.log('Model being used:', model)
         for (const tool of tools) {
             try {
-                if (!tool.schema || !tool.schema._def) {
+                if (!tool.schema || !(tool.schema as any)._def) {
                     console.error(`Tool ${tool.name} has invalid schema structure:`, tool.schema)
                 }
             } catch (error) {
@@ -324,11 +324,11 @@ export class ChatService {
             }
         }
 
-        let llmWithTools;
+        let llmWithTools: any;
         try {
             // Try binding tools - if it fails, continue without tools
             console.log('Attempting to bind tools to LLM...')
-            
+
             // Check if this is Gemini or OpenAI
             if (model.includes('gemini')) {
                 console.log('Using Gemini model - attempting tool binding')
@@ -346,12 +346,12 @@ export class ChatService {
             console.error('Model:', model)
             console.error('LLM type:', llm.constructor.name)
             console.error('Number of tools:', tools.length)
-            
+
             // Try to identify which tool is causing the issue
             console.log('Testing tools individually...')
             for (let i = 0; i < tools.length; i++) {
                 try {
-                    const testLlm = model.includes('gemini') ? 
+                    const testLlm = model.includes('gemini') ?
                         new ChatGoogleGenerativeAI({ model, maxOutputTokens: 2048, apiKey }) :
                         new ChatOpenAI({ model, maxTokens: 2048, apiKey });
                     testLlm.bindTools([tools[i]]);
@@ -360,7 +360,7 @@ export class ChatService {
                     console.error(`✗ Tool ${i}: ${tools[i].name} - FAILED`, e)
                 }
             }
-            
+
             throw error
         }
 

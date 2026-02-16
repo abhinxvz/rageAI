@@ -109,7 +109,7 @@ export class ConversationService {
             },
         })
 
-        return conversations.map(conv => ({
+        return conversations.map((conv: any) => ({
             threadId: conv.threadId ?? "",
             title: conv.title || "Untitled Chat",
             createdAt: conv.createdAt,

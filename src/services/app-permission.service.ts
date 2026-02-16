@@ -23,7 +23,7 @@ export class AppPermissionService {
             orderBy: { connectedAt: 'desc' }
         })
 
-        return permissions.map(p => ({
+        return permissions.map((p: any) => ({
             id: p.id,
             userId: p.userId,
             appId: p.appId,
@@ -55,7 +55,7 @@ export class AppPermissionService {
         if (permission.expiresAt && permission.expiresAt.getTime() < Date.now() + 60000) {
             if (permission.refreshToken) {
                 try {
-                    oauth2Client = new google.auth.OAuth2(
+                    const oauth2Client = new google.auth.OAuth2(
                         process.env.GOOGLE_CLIENT_ID!,
                         process.env.GOOGLE_CLIENT_SECRET!
                     )
@@ -178,7 +178,7 @@ export class AppPermissionService {
 
     async storeDirectToken(userId: string, appId: string, token: string): Promise<void> {
         const appConfig = APP_CONFIGURATIONS[appId as keyof typeof APP_CONFIGURATIONS]
-        
+
         // For GitHub and Notion, tokens don't expire
         const expiryDate = new Date(Date.now() + (365 * 24 * 60 * 60 * 1000)) // 1 year
 
@@ -232,7 +232,7 @@ export class AppPermissionService {
             const clientId = process.env.GITHUB_CLIENT_ID!
             const scopes = appConfig.scopes.join(' ')
             const state = Buffer.from(JSON.stringify({ appId, userId })).toString('base64')
-            
+
             return `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&state=${state}`
         }
 
@@ -240,7 +240,7 @@ export class AppPermissionService {
         if (appConfig.provider === 'notion') {
             const clientId = process.env.NOTION_CLIENT_ID!
             const state = Buffer.from(JSON.stringify({ appId, userId })).toString('base64')
-            
+
             return `https://api.notion.com/v1/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&owner=user&state=${state}`
         }
 
@@ -249,7 +249,7 @@ export class AppPermissionService {
             const clientId = process.env.SPOTIFY_CLIENT_ID!
             const scopes = appConfig.scopes.join(' ')
             const state = Buffer.from(JSON.stringify({ appId, userId })).toString('base64')
-            
+
             return `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&state=${state}`
         }
 
@@ -258,7 +258,7 @@ export class AppPermissionService {
             const clientId = process.env.TWITTER_CLIENT_ID!
             const scopes = appConfig.scopes.join(' ')
             const state = Buffer.from(JSON.stringify({ appId, userId })).toString('base64')
-            
+
             // Twitter OAuth 2.0 with PKCE
             return `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&state=${state}&code_challenge=challenge&code_challenge_method=plain`
         }
@@ -268,7 +268,7 @@ export class AppPermissionService {
             const clientId = process.env.INSTAGRAM_CLIENT_ID!
             const scopes = appConfig.scopes.join(',')
             const state = Buffer.from(JSON.stringify({ appId, userId })).toString('base64')
-            
+
             return `https://api.instagram.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}&response_type=code&state=${state}`
         }
 
