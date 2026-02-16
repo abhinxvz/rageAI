@@ -1,5 +1,5 @@
 {
-  "name": "Rage AI",
+  "name": "rage-ai",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -14,7 +14,14 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
-    "db:validate": "prisma validate"
+    "db:validate": "prisma validate",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "npm run lint:fix",
+      "npm run type-check"
+    ]
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.0",
@@ -83,6 +90,8 @@
     "@types/node": "^20.19.9",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.10",
     "tailwindcss": "^4.1.8",
     "tw-animate-css": "^1.3.6",
     "typescript": "^5"
