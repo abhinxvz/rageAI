@@ -1,13 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'upload.wikimedia.org',
-      },
-    ],
+  eslint: {
+    // Disable ESLint during production builds
+    // We run ESLint in pre-commit hooks instead
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // We run type checking separately
+    ignoreBuildErrors: false,
   },
 };
 
