@@ -10,10 +10,6 @@
 !.yarn/releases
 !.yarn/versions
 
-
-#system prompts
-/src/lib/prompt.ts
-
 # testing
 /coverage
 
