@@ -19,6 +19,7 @@
 }
 
 @custom-variant dark (&:is(.dark *));
+
 :root {
   --background: oklch(1.0000 0 0);
   --foreground: oklch(0.2161 0.0061 56.0434);
@@ -191,19 +192,18 @@ body {
 }
 
 /* Make "AI" text green */
-h1, h2, h3, h4, h5, h6, .text-foreground {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.text-foreground {
   & {
     background: linear-gradient(to right, currentColor 0%, currentColor 100%);
     -webkit-background-clip: text;
     background-clip: text;
   }
-}
-
-/* Target "AI" specifically */
-h1:has-text("AI"), 
-h2:has-text("AI"),
-h3:has-text("AI") {
-  display: inline;
 }
 
 /* Global AI text styling */
