@@ -104,14 +104,14 @@ export function ChatSidebar({
       {/* Conversations List */}
       <div className="flex-1 overflow-y-auto px-5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
         <div className="space-y-1 pb-4">
-          {conversations?.length === 0 && (
+          {Array.isArray(conversations) && conversations.length === 0 && (
             <div className="text-center py-8 px-4">
               <MessageSquare className="h-12 w-12 text-gray-600 mx-auto mb-3" />
               <p className="text-sm text-gray-500">No conversations yet</p>
               <p className="text-xs text-gray-600 mt-1">Start a new chat to begin</p>
             </div>
           )}
-          {conversations?.map((conversation: any) => (
+          {Array.isArray(conversations) && conversations.map((conversation: any) => (
             <div
               key={conversation.threadId}
               className={cn(
@@ -169,7 +169,7 @@ export function ChatSidebar({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 bg-[#1a1a1a] border-white/10">
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => signOut()}
               className="text-gray-300 hover:text-white hover:bg-white/5 cursor-pointer"
             >
