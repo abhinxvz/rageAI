@@ -2,6 +2,7 @@ import { Montserrat } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/sonner'
+import { Protection } from '@/components/protection'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +22,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body>
         <Providers>
+          <Protection />
           {children}
           <Toaster />
         </Providers>
