@@ -3,6 +3,7 @@ import './globals.css'
 import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/sonner'
 
+export const dynamic = 'force-dynamic'
 
 const montserrat = Montserrat({ subsets: ['latin'] })
 
