@@ -14,7 +14,9 @@ import { twMerge } from "tailwind-merge"
 import { AnimatePresence, motion } from "motion/react"
 import AppsSidebar from "@/components/chat/app-sidebar"
 
-export default function Layout() {
+export const dynamic = 'force-dynamic'
+
+export default function Layout({ children }: { children: React.ReactNode }) {
     const { data: session, status } = useSession()
     const router = useRouter()
     const params = useParams()
@@ -38,7 +40,7 @@ export default function Layout() {
     return (
         <div className="h-screen relative flex bg-[#0a0a0a] overflow-hidden">
             <AnimatePresence initial={false}>
-                {(sidebarOpen || true) && ( 
+                {(sidebarOpen || true) && (
                     <motion.div
                         key="sidebar"
                         initial={{ width: 0, opacity: 0 }}
