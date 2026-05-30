@@ -1,6 +1,6 @@
 "use client"
 
-import { signIn, getSession } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,14 +8,13 @@ import Image from "next/image"
 
 export default function SignIn() {
   const router = useRouter()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
-    getSession().then((session) => {
-      if (session) {
-        router.push("/chat")
-      }
-    })
-  }, [router])
+    if (status === "authenticated" && session) {
+      router.push("/chat")
+    }
+  }, [status, session, router])
 
   const handleSignIn = () => {
     signIn("google", { callbackUrl: "/chat" })
