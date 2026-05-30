@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import Link from "next/link"
 
 export default function SignIn() {
   const router = useRouter()
@@ -59,29 +58,27 @@ export default function SignIn() {
             <CardDescription className="text-base text-gray-400 font-montserrat">Connect with Google to unlock your AI assistant</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <Link href="/auth/signin">
-              <button 
-                onClick={handleSignIn}
-                className="w-full bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-sm font-semibold leading-6 text-white inline-block"
-              >
-                <span className="absolute inset-0 overflow-hidden rounded-full">
-                  <span className="absolute inset-0 rounded-full bg-[image:radial-gradient(75%_100%_at_50%_0%,rgba(56,189,248,0.6)_0%,rgba(56,189,248,0)_75%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                </span>
-                <div className="relative flex space-x-2 items-center justify-center z-10 rounded-full bg-zinc-950 py-3 px-6 ring-1 ring-white/10">
-                  <Image
-                    src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png'
-                    width={24}
-                    height={24}
-                    alt="Google Logo"
-                  />
-                  <span className="font-montserrat">Continue with Google</span>
-                  <svg fill="none" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10.75 8.75L14.25 12L10.75 15.25" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"/>
-                  </svg>
-                </div>
-                <span className="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-[#1072f8]/0 via-[#1072f8]/90 to-[#1072f8]/0 transition-opacity duration-500 group-hover:opacity-40" />
-              </button>
-            </Link>
+            <button
+              onClick={handleSignIn}
+              className="w-full bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-sm font-semibold leading-6 text-white inline-block"
+            >
+              <span className="absolute inset-0 overflow-hidden rounded-full">
+                <span className="absolute inset-0 rounded-full bg-[image:radial-gradient(75%_100%_at_50%_0%,rgba(56,189,248,0.6)_0%,rgba(56,189,248,0)_75%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              </span>
+              <div className="relative flex space-x-2 items-center justify-center z-10 rounded-full bg-zinc-950 py-3 px-6 ring-1 ring-white/10">
+                <Image
+                  src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png'
+                  width={24}
+                  height={24}
+                  alt="Google Logo"
+                />
+                <span className="font-montserrat">Continue with Google</span>
+                <svg fill="none" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10.75 8.75L14.25 12L10.75 15.25" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                </svg>
+              </div>
+              <span className="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-[#1072f8]/0 via-[#1072f8]/90 to-[#1072f8]/0 transition-opacity duration-500 group-hover:opacity-40" />
+            </button>
 
             <div className="space-y-4 pt-2">
               <div className="flex items-center justify-center gap-4 text-xs text-gray-400 font-montserrat">
@@ -127,7 +124,7 @@ export default function SignIn() {
         <div className="text-center space-y-3">
           <p className="text-sm font-medium text-white font-montserrat">Try saying:</p>
           <div className="bg-zinc-900/50 border border-white/10 rounded-lg p-4 text-sm italic text-[#1072f8] font-montserrat">
-            "Hey Rage, schedule a meeting with John tomorrow at 3 PM and send him the invite"
+            &quot;Hey Rage, schedule a meeting with John tomorrow at 3 PM and send him the invite&quot;
           </div>
         </div>
       </div>
