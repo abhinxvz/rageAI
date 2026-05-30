@@ -52,7 +52,7 @@ export const APP_CONFIGURATIONS = {
     requiresOAuth: false,
     scopes: [
       'repo',
-      'delete_repo', 
+      'delete_repo',
       'admin:org',
       'admin:public_key',
       'admin:repo_hook',
@@ -172,14 +172,7 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (user?.email) {
-        const waitlistEntry = await prisma.waitlist.findUnique({
-          where: { email: user.email }
-        })
-        if (process.env.NODE_ENV !== 'development' && waitlistEntry?.status !== 'APPROVED') {
-          throw new Error('WaitlistRequired')
-        }
-      }
+      // Waitlist check disabled - allow all users
       return true
     },
     async jwt({ token, account, trigger, user }) {
@@ -226,7 +219,7 @@ export const authOptions: NextAuthOptions = {
     }
   },
   events: {
-    async signIn({ user,  isNewUser }) {
+    async signIn({ user, isNewUser }) {
       console.log(`User signed in: ${user.email} (New: ${isNewUser})`)
     },
     async signOut() {
