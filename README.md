@@ -1,170 +1,158 @@
-# Rage AI
+<div align="center">
+  <img src="./public/logo.png" alt="Rage AI Logo" width="110" />
+  <h1>Rage AI</h1>
+  <p><strong>Crimson-Obsidian Personal AI Workspace Assistant — BYOK, Multi-Model &amp; Zero-OAuth Built-In Tools</strong></p>
 
-A powerful AI chat application with multi-model support and third-party integrations. Built with Next.js 15, TypeScript, and LangChain.
+  <p>
+    <img src="https://img.shields.io/badge/Next.js-16.1-0b0909?style=for-the-badge&logo=next.js&logoColor=ef4444" alt="Next.js 16" />
+    <img src="https://img.shields.io/badge/TypeScript-5-0b0909?style=for-the-badge&logo=typescript&logoColor=ef4444" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/LangGraph-Agent-dc2626?style=for-the-badge&logo=langchain&logoColor=white" alt="LangGraph" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-v4-0b0909?style=for-the-badge&logo=tailwindcss&logoColor=ef4444" alt="Tailwind CSS v4" />
+    <img src="https://img.shields.io/badge/Prisma-Neon_PostgreSQL-0b0909?style=for-the-badge&logo=prisma&logoColor=ef4444" alt="Prisma & Neon" />
+  </p>
 
-![Rage AI](./rageAI-nobg.png)
+  <p>
+    <img src="https://img.shields.io/badge/Google_Gemini-Free_Tier-ef4444?style=flat-square&logo=googlegemini&logoColor=white" alt="Google Gemini Free Tier" />
+    <img src="https://img.shields.io/badge/NVIDIA_Nemotron-Free_NIM-dc2626?style=flat-square&logo=nvidia&logoColor=white" alt="NVIDIA Nemotron Free NIM" />
+    <img src="https://img.shields.io/badge/OpenAI-GPT--5_%2F_4o-b91c1c?style=flat-square&logo=openai&logoColor=white" alt="OpenAI GPT-5" />
+    <img src="https://img.shields.io/badge/Auth-Minimal_Google_OAuth-141010?style=flat-square&logo=google&logoColor=white" alt="Minimal Google OAuth" />
+  </p>
+</div>
 
-## Features
+---
 
-- **Multi-Model AI Support** - OpenAI, Google Gemini, Mistral AI
-- **Advanced Chat Interface** - Thread management, markdown rendering, code highlighting
-- **Third-Party Integrations** - GitHub, Gmail, Google Drive, Notion, Spotify, Twitter, Instagram, Discord
-- **Secure Authentication** - NextAuth with OAuth providers
-- **Modern UI** - Beautiful components with Tailwind CSS and Framer Motion
-- **Database** - PostgreSQL with Prisma ORM
-- **Real-time Streaming** - AI responses with streaming support
+## Overview
+
+**Rage AI** is a fast, bring-your-own-key (BYOK) AI workspace assistant built with Next.js 16, LangGraph, and Neon PostgreSQL. Sign in with minimal Google OAuth (`openid`, `email`, `profile`), keep your API keys, webhooks, and resume profile in your browser, and automate real tasks across Google Workspace and the open web.
+
+## Key Features
+
+- **Multi-Model BYOK + Free-Tier Ready**
+  - **Google Gemini (AI Studio Free Tier):** `gemini-3.8-flash`, `gemini-3.5-flash-lite`, `gemini-flash-latest`, `gemini-2.5-flash`
+  - **NVIDIA Nemotron (Free NIM Endpoints):** `nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nemotron-3.5-lightning-30b-a3b`, `nvidia/llama-3.3-nemotron-super-49b-v1.5`, `nvidia/nemotron-3.5-bolt-e4b`
+  - **OpenAI / ChatGPT:** `gpt-5`, `gpt-5-chat-latest`, `gpt-4o`, `gpt-4o-mini`
+- **Auto-Failover & Side-by-Side Versus Mode**
+  - Automatically switches to another configured provider if a free tier hits a `429` rate limit or `503`.
+  - Toggle **Versus** in the composer to stream and compare two models side-by-side on the same prompt.
+- **Resume Job Scraper & Outreach Pipeline (`scrape_jobs`)**
+  - Upload or paste your resume inside **Keys, Webhooks & Resume**.
+  - Scrapes live roles from **RemoteOK**, **Remotive**, **Arbeitnow**, and custom **Greenhouse**, **Lever**, or career URLs, scores them against your skills, saves a tailored **Google Doc** brief, drafts **Gmail** outreach, schedules **Google Calendar** follow-ups, and pushes digests to **Discord / Slack**.
+- **Zero-OAuth Built-In Tools**
+  - `read_webpage` — SSRF-safe public URL & article extraction via Cheerio
+  - `youtube_transcript` — Timestamped YouTube caption extraction & summarization
+  - `github_repo_inspector` — Public repo overview, README, issues & releases
+  - `send_webhook_notification` — Direct **Discord** & **Slack** webhook alerts
+  - `tavily_search` — Optional live web search & citations
+- **Workspace Power Tools**
+  - **Minimal Google OAuth** at login; selectively toggle **Gmail**, **Google Calendar**, and **Google Docs** on demand.
+  - **1-Click Morning Briefing**, **Voice Input** (`SpeechRecognition`), **Live Tool-Trace Pills**, and an **Artifact Preview Drawer** (sandboxed HTML/SVG preview, Markdown & `.ics` export).
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS v4
-- **AI/ML:** LangChain, OpenAI SDK, Google Generative AI
-- **Database:** PostgreSQL (Neon) with Prisma
-- **Authentication:** NextAuth.js
-- **UI Components:** Radix UI, Framer Motion
-- **State Management:** TanStack Query
-
-## Prerequisites
-
-- Node.js 18+ 
-- PostgreSQL database (or Neon serverless)
-- API keys for AI models (OpenAI, Google, etc.)
-- OAuth credentials for third-party integrations
+| Layer | Technologies |
+| --- | --- |
+| **Framework** | Next.js 16 (App Router, Turbopack), React 19, TypeScript |
+| **Agent & LLMs** | LangGraph, `@langchain/google-genai`, `@langchain/openai`, `@langchain/tavily`, Cheerio |
+| **Database & Auth** | Neon PostgreSQL, Prisma ORM, NextAuth.js (Google OAuth + selective app scopes) |
+| **UI & Motion** | Tailwind CSS v4, Radix UI, Framer Motion, Lucide, React Icons |
+| **Data & State** | TanStack Query, browser `localStorage` for BYOK keys, webhooks & resume |
 
 ## Getting Started
 
-### 1. Clone the repository
+### 1. Clone & Install
 
 ```bash
 git clone https://github.com/abhinxvz/rageAI.git
 cd rageAI
-```
-
-### 2. Install dependencies
-
-```bash
-npm install
-# or
-pnpm install
-# or
 bun install
 ```
 
-### 3. Set up environment variables
+### 2. Configure Environment Variables
 
-Create a `.env` file in the root directory:
+Copy `.env.example` to `.env` and fill in your credentials:
+
+```bash
+cp .env.example .env
+```
 
 ```env
-# Database
-DATABASE_URL="your_postgresql_connection_string"
+NODE_ENV=development
+
+# Database (PostgreSQL / Neon)
+DATABASE_URL="postgresql://user:password@localhost:5432/rageai"
 
 # NextAuth
+NEXTAUTH_SECRET="your-nextauth-secret"
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your_nextauth_secret"
+MAX_USER_MESSAGES_PER_CHAT=20
+MAX_OUTPUT_TOKENS=2048
 
-# AI Models
-OPENAI_API_KEY="your_openai_key"
-GOOGLE_GENERATIVE_AI_API_KEY="your_google_key"
-MISTRAL_API_KEY="your_mistral_key"
+# Google OAuth (Sign-in + Optional Gmail, Calendar, Docs)
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
 
-# OAuth Providers
-GITHUB_CLIENT_ID="your_github_client_id"
-GITHUB_CLIENT_SECRET="your_github_client_secret"
-
-GOOGLE_CLIENT_ID="your_google_client_id"
-GOOGLE_CLIENT_SECRET="your_google_client_secret"
-
-# Add other OAuth credentials as needed
+# Optional Web Search (Tavily)
+TAVILY_API_KEY="your-tavily-api-key"
 ```
 
-### 4. Set up the database
+Add these **Authorized redirect URIs** in Google Cloud Console:
+- `http://localhost:3000/api/auth/callback/google`
+- `http://localhost:3000/api/auth/callback/google-app`
+
+### 3. Push Database Schema & Run
 
 ```bash
-# Generate Prisma client
-npm run db:generate
-
-# Push schema to database
-npm run db:push
-
-# (Optional) Open Prisma Studio
-npm run db:studio
+bun run db:generate
+bun run db:push
+bun run dev
 ```
 
-### 5. Run the development server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000), sign in with Google, and add your Gemini / Nemotron / OpenAI keys, webhooks, or resume in the **Keys & Resume** modal.
 
 ## Project Structure
 
-```
+```text
 rageAI/
-├── prisma/              # Database schema and migrations
-├── public/              # Static assets
+├── prisma/                         # Prisma PostgreSQL schema
+├── public/                         # Logo, fonts, and static assets
 ├── src/
-│   ├── app/            # Next.js app router pages
-│   │   ├── api/        # API routes
-│   │   ├── auth/       # Authentication pages
-│   │   └── chat/       # Chat interface
-│   ├── components/     # React components
-│   │   ├── chat/       # Chat-specific components
-│   │   └── ui/         # Reusable UI components
-│   ├── hooks/          # Custom React hooks
-│   ├── lib/            # Utility functions and integrations
-│   ├── services/       # Business logic layer
-│   └── types/          # TypeScript type definitions
-└── middleware.ts       # Next.js middleware
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── apps/               # On-demand Google Workspace connect/disconnect
+│   │   │   ├── auth/               # NextAuth + Google app OAuth callback
+│   │   │   ├── chat/               # Streaming LangGraph chat & history APIs
+│   │   │   ├── config/             # Runtime limits & OAuth status
+│   │   │   └── conversations/      # Thread CRUD APIs
+│   │   ├── auth/                   # Crimson Sign-in & Auth Error pages
+│   │   ├── chat/                   # Workspace chat & thread pages
+│   │   ├── privacy/ & terms/       # Legal pages
+│   │   └── page.tsx                # Rage AI landing page
+│   ├── components/
+│   │   ├── chat/                   # ChatInterface, Composer, ArtifactDrawer, Sidebars
+│   │   ├── keys-manager.tsx        # BYOK keys, webhooks & resume manager
+│   │   └── landing-visuals.tsx     # Isometric & wireframe crimson visuals
+│   ├── lib/
+│   │   ├── auth.ts                 # NextAuth & selective Google OAuth scopes
+│   │   ├── models.ts               # Gemini, Nemotron NIM & OpenAI registry
+│   │   ├── job-tools.ts            # Live job scraper & resume scorer
+│   │   ├── web-tools.ts            # Webpage, YouTube, GitHub & webhook tools
+│   │   └── prompt.ts               # Rage AI agent system prompt
+│   └── services/                   # ChatService, ConversationService, AppPermissionService
+└── middleware.ts                   # Protected /chat routes
 ```
 
-## Available Scripts
+## Scripts
 
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint errors
-npm run type-check   # Run TypeScript type checking
-npm run validate     # Run type-check and lint
-npm run db:generate  # Generate Prisma client
-npm run db:push      # Push schema to database
-npm run db:studio    # Open Prisma Studio
-npm run db:reset     # Reset database
+bun run dev          # Start development server
+bun run build        # Production build
+bun run start        # Start production server
+bun run type-check   # TypeScript check (tsc --noEmit)
+bun run lint         # ESLint check
+bun run db:generate  # Generate Prisma client
+bun run db:push      # Push schema to database
 ```
-
-## Integrations
-
-Rage AI supports multiple third-party integrations:
-
-- **GitHub** - Repository management, issues, pull requests
-- **Gmail** - Email reading and sending
-- **Google Drive** - File access and management
-- **Notion** - Database and page operations
-- **Spotify** - Music playback control
-- **Twitter** - Tweet posting and timeline access
-- **Instagram** - Media posting and feed access
-- **Discord** - Server and channel management
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is private and proprietary.
 
 ## Author
 
-**Abhinav**
-- GitHub: [@abhinxvz](https://github.com/abhinxvz)
-
-## Acknowledgments
-
-- Built with [Next.js](https://nextjs.org/)
-- AI powered by [LangChain](https://langchain.com/)
-- UI components from [Radix UI](https://radix-ui.com/)
-- Animations by [Framer Motion](https://framer.com/motion/)
+**Abhinav** — [@abhinxvz](https://github.com/abhinxvz)
