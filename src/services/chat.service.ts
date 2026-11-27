@@ -1,16 +1,14 @@
-
 import { ConversationService } from './conversation.service'
 import { prisma } from '@/lib/prisma'
 import { getSystemPrompt } from '@/lib/prompt'
 import { AppPermissionService } from './app-permission.service'
-import { WebBrowser } from "langchain/tools/webbrowser";
+import { getProviderForModel } from '@/lib/models'
 
-import { MessagesAnnotation } from "@langchain/langgraph";
+import { MessagesAnnotation, StateGraph } from "@langchain/langgraph";
 import { BaseMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
-import { ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
-import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
-import { StateGraph } from "@langchain/langgraph";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatOpenAI } from "@langchain/openai";
 import { StructuredTool } from '@langchain/core/tools'
 import { TavilySearch } from "@langchain/tavily";
 import {
@@ -23,16 +21,26 @@ import {
 import { GmailSendMessageTool } from '@/lib/gmail-tools'
 import { GoogleCalendarCreateEvent, GoogleCalendarGetEvents, GoogleCalendarUpdateEvent, GoogleCalendarDeleteEvent } from '@/lib/calendar'
 import { GoogleDocsCreateDocument, GoogleDocsReadDocument, GoogleDocsUpdateDocument, GoogleDocsFormatDocument, GoogleDocsSearchDocuments, GoogleDocsShareDocument, GoogleDocsDeleteDocument } from '@/lib/docs'
-import { createGitHubTools } from '@/lib/github-langchain-tools'
-import { createNotionTools } from '@/lib/notion-langchain-tools'
-import { createSpotifyTools } from '@/lib/spotify-langchain-tools'
-import { createTwitterTools } from '@/lib/twitter-langchain-tools'
+import {
+    WebPageReaderTool,
+    YouTubeTranscriptTool,
+    GitHubInspectorTool,
+    WebhookPushTool,
+    ConfiguredWebhooks,
+} from '@/lib/web-tools'
+import { JobScraperTool } from '@/lib/job-tools'
 
 interface ChatRequest {
-    messages: any[]
+    messages: { role: string; content: string }[]
     threadId: string
     model: string
     apiKey: string
+    fallbackModel?: string
+    fallbackApiKey?: string
+    webhooks?: ConfiguredWebhooks
+    resumeText?: string
+    streamEvents?: boolean
+    ephemeral?: boolean
 }
 
 interface ChatFetchRequest {
@@ -40,11 +48,40 @@ interface ChatFetchRequest {
     userId: string
 }
 
+function extractChunkText(chunk: any): string {
+    if (!chunk) return ''
+    if (typeof chunk.content === 'string') return chunk.content
+    if (Array.isArray(chunk.content)) {
+        return chunk.content
+            .map((part: any) => (typeof part === 'string' ? part : part?.text || ''))
+            .join('')
+    }
+    if (typeof chunk.text === 'string') return chunk.text
+    return ''
+}
+
+function isFailoverEligibleError(err: any): boolean {
+    const msg = String(err?.message || err || '').toLowerCase()
+    const status = err?.status || err?.response?.status
+    return (
+        status === 429 ||
+        status === 503 ||
+        status === 502 ||
+        msg.includes('429') ||
+        msg.includes('rate limit') ||
+        msg.includes('quota') ||
+        msg.includes('resource exhausted') ||
+        msg.includes('overloaded') ||
+        msg.includes('timeout') ||
+        msg.includes('service unavailable')
+    )
+}
+
 export class ChatService {
     private conversationService = new ConversationService()
     private appPermissionService = new AppPermissionService()
     private user: {
-        name: string,
+        name: string
         email: string
         id: string
     }
@@ -53,8 +90,7 @@ export class ChatService {
         this.user = user
     }
 
-
-    private convertMessagesToLangChain(messages: any[]): BaseMessage[] {
+    private convertMessagesToLangChain(messages: { role: string; content: string }[]): BaseMessage[] {
         return messages.map((msg) => {
             switch (msg.role) {
                 case 'user':
@@ -69,15 +105,12 @@ export class ChatService {
         }).filter(Boolean) as BaseMessage[];
     }
 
-    private async getToolsAndAccessConfig() {
-        const gmailAccessToken = await this.appPermissionService.getAppAccessToken(this.user.id, 'gmail');
-        const calendarAccessToken = await this.appPermissionService.getAppAccessToken(this.user.id, 'calendar');
-        const docsAccessToken = await this.appPermissionService.getAppAccessToken(this.user.id, 'docs');
-        const driveAccessToken = await this.appPermissionService.getAppAccessToken(this.user.id, 'drive');
-        const githubAccessToken = await this.appPermissionService.getAppAccessToken(this.user.id, 'github');
-        const notionAccessToken = await this.appPermissionService.getAppAccessToken(this.user.id, 'notion');
-        const spotifyAccessToken = await this.appPermissionService.getAppAccessToken(this.user.id, 'spotify');
-        const twitterAccessToken = await this.appPermissionService.getAppAccessToken(this.user.id, 'twitter');
+    private async getToolsAndAccessConfig(webhooks?: ConfiguredWebhooks, resumeText?: string) {
+        const [gmailAccessToken, calendarAccessToken, docsAccessToken] = await Promise.all([
+            this.appPermissionService.getAppAccessToken(this.user.id, 'gmail'),
+            this.appPermissionService.getAppAccessToken(this.user.id, 'calendar'),
+            this.appPermissionService.getAppAccessToken(this.user.id, 'docs'),
+        ])
 
         const tokenData = {
             credentials: {
@@ -85,9 +118,17 @@ export class ChatService {
             },
         }
 
-        const tools: StructuredTool[] = []
+        const tools: StructuredTool[] = [
+            new JobScraperTool(resumeText || ''),
+            new WebPageReaderTool(),
+            new YouTubeTranscriptTool(),
+            new GitHubInspectorTool(),
+        ]
 
-        // Add Tavily search if API key is available
+        if (webhooks?.discord || webhooks?.slack) {
+            tools.push(new WebhookPushTool(webhooks))
+        }
+
         if (process.env.TAVILY_API_KEY) {
             try {
                 tools.push(new TavilySearch({
@@ -116,10 +157,10 @@ export class ChatService {
         if (calendarAccessToken) {
             try {
                 tools.push(
-                    new GoogleCalendarCreateEvent(calendarAccessToken as string),
-                    new GoogleCalendarGetEvents(calendarAccessToken as string),
-                    new GoogleCalendarUpdateEvent(calendarAccessToken as string),
-                    new GoogleCalendarDeleteEvent(calendarAccessToken as string)
+                    new GoogleCalendarCreateEvent(calendarAccessToken),
+                    new GoogleCalendarGetEvents(calendarAccessToken),
+                    new GoogleCalendarUpdateEvent(calendarAccessToken),
+                    new GoogleCalendarDeleteEvent(calendarAccessToken)
                 )
             } catch (error) {
                 console.error('Error initializing Calendar tools:', error)
@@ -129,247 +170,79 @@ export class ChatService {
         if (docsAccessToken) {
             try {
                 tools.push(
-                    new GoogleDocsCreateDocument(docsAccessToken as string),
-                    new GoogleDocsReadDocument(docsAccessToken as string),
-                    new GoogleDocsUpdateDocument(docsAccessToken as string),
-                    new GoogleDocsFormatDocument(docsAccessToken as string),
-                    new GoogleDocsSearchDocuments(docsAccessToken as string),
-                    new GoogleDocsShareDocument(docsAccessToken as string),
-                    new GoogleDocsDeleteDocument(docsAccessToken as string)
+                    new GoogleDocsCreateDocument(docsAccessToken),
+                    new GoogleDocsReadDocument(docsAccessToken),
+                    new GoogleDocsUpdateDocument(docsAccessToken),
+                    new GoogleDocsFormatDocument(docsAccessToken),
+                    new GoogleDocsSearchDocuments(docsAccessToken),
+                    new GoogleDocsShareDocument(docsAccessToken),
+                    new GoogleDocsDeleteDocument(docsAccessToken)
                 )
             } catch (error) {
                 console.error('Error initializing Docs tools:', error)
             }
         }
 
-        if (driveAccessToken) {
-            try {
-                const { GoogleDriveListFiles, GoogleDriveSearchFiles, GoogleDriveGetFile, GoogleDriveCreateFolder, GoogleDriveUploadFile, GoogleDriveDeleteFile, GoogleDriveMoveFile, GoogleDriveRenameFile, GoogleDriveShareFile, GoogleDriveCopyFile, GoogleDriveGetStorageQuota } = await import('@/lib/drive-tools')
-                tools.push(
-                    new GoogleDriveListFiles(driveAccessToken as string),
-                    new GoogleDriveSearchFiles(driveAccessToken as string),
-                    new GoogleDriveGetFile(driveAccessToken as string),
-                    new GoogleDriveCreateFolder(driveAccessToken as string),
-                    new GoogleDriveUploadFile(driveAccessToken as string),
-                    new GoogleDriveDeleteFile(driveAccessToken as string),
-                    new GoogleDriveMoveFile(driveAccessToken as string),
-                    new GoogleDriveRenameFile(driveAccessToken as string),
-                    new GoogleDriveShareFile(driveAccessToken as string),
-                    new GoogleDriveCopyFile(driveAccessToken as string),
-                    new GoogleDriveGetStorageQuota(driveAccessToken as string)
-                )
-            } catch (error) {
-                console.error('Error initializing Drive tools:', error)
-            }
-        }
-
-        if (githubAccessToken) {
-            try {
-                const githubTools = createGitHubTools(githubAccessToken as string)
-                tools.push(...githubTools)
-            } catch (error) {
-                console.error('Error initializing GitHub tools:', error)
-            }
-        }
-
-        if (notionAccessToken) {
-            try {
-                const notionTools = createNotionTools(notionAccessToken as string)
-                tools.push(...notionTools)
-            } catch (error) {
-                console.error('Error initializing Notion tools:', error)
-            }
-        }
-
-        if (spotifyAccessToken) {
-            try {
-                const spotifyTools = createSpotifyTools({
-                    accessToken: spotifyAccessToken as string,
-                    userId: this.user.id
-                })
-                tools.push(...spotifyTools)
-            } catch (error) {
-                console.error('Error initializing Spotify tools:', error)
-            }
-        }
-
-        if (twitterAccessToken) {
-            try {
-                const twitterMetadata = await this.appPermissionService.getAppMetadata(this.user.id, 'twitter')
-                const twitterUserId = twitterMetadata?.twitterUserId || this.user.id
-
-                const twitterTools = createTwitterTools({
-                    bearerToken: twitterAccessToken as string,
-                    userId: twitterUserId
-                })
-                tools.push(...twitterTools)
-            } catch (error) {
-                console.error('Error initializing Twitter tools:', error)
-            }
-        }
-
-        const instagramAccessToken = await this.appPermissionService.getAppAccessToken(this.user.id, 'instagram');
-
-        if (instagramAccessToken) {
-            try {
-                const instagramMetadata = await this.appPermissionService.getAppMetadata(this.user.id, 'instagram')
-                const instagramAccountId = instagramMetadata?.instagramAccountId
-
-                if (instagramAccountId) {
-                    const { createInstagramTools } = await import('@/lib/instagram-langchain-tools')
-                    const instagramTools = createInstagramTools({
-                        accessToken: instagramAccessToken as string,
-                        instagramAccountId
-                    })
-                    tools.push(...instagramTools)
-                }
-            } catch (error) {
-                console.error('Error initializing Instagram tools:', error)
-            }
-        }
-
-        const discordAccessToken = await this.appPermissionService.getAppAccessToken(this.user.id, 'discord');
-
-        if (discordAccessToken) {
-            try {
-                const { createDiscordTools } = await import('@/lib/discord-langchain-tools')
-                const discordTools = createDiscordTools({
-                    botToken: discordAccessToken as string,
-                    userId: this.user.id
-                })
-                tools.push(...discordTools)
-            } catch (error) {
-                console.error('Error initializing Discord tools:', error)
-            }
-        }
-
         const accessConfig = {
-            gmail: gmailAccessToken ? true : false,
-            calendar: calendarAccessToken ? true : false,
-            docs: docsAccessToken ? true : false,
-            drive: driveAccessToken ? true : false,
-            github: githubAccessToken ? true : false,
-            notion: notionAccessToken ? true : false,
-            spotify: spotifyAccessToken ? true : false,
-            twitter: twitterAccessToken ? true : false,
-            instagram: instagramAccessToken ? true : false,
-            discord: discordAccessToken ? true : false
+            gmail: Boolean(gmailAccessToken),
+            calendar: Boolean(calendarAccessToken),
+            docs: Boolean(docsAccessToken),
+            discordWebhook: Boolean(webhooks?.discord),
+            slackWebhook: Boolean(webhooks?.slack),
         }
 
-        // Filter out any undefined or invalid tools and validate schema
-        const validTools = tools.filter(tool => {
-            if (!tool || typeof tool !== 'object') {
-                console.error('Invalid tool: not an object', tool)
-                return false
-            }
-            if (!tool.name) {
-                console.error('Invalid tool: missing name', tool)
-                return false
-            }
-            if (!tool.schema || typeof tool.schema !== 'object') {
-                console.error('Invalid tool: missing or invalid schema', tool.name)
-                return false
-            }
-            return true
-        })
-
-        console.log(`Total tools: ${tools.length}, Valid tools: ${validTools.length}`)
-        console.log('Tool names:', validTools.map(t => t.name))
-
+        const validTools = tools.filter(tool => Boolean(tool && typeof tool === 'object' && tool.name && tool.schema))
         return { tools: validTools, accessConfig };
-
-
     }
 
-    async processChat(request: ChatRequest): Promise<ReadableStream> {
-        const { messages, threadId, model, apiKey } = request
+    private createLLM(model: string, apiKey: string) {
+        const provider = getProviderForModel(model)
+        const maxTokens = parseInt(process.env.MAX_OUTPUT_TOKENS || '2048', 10)
 
-        if (!apiKey) {
-            throw new Error('API key is required')
+        if (provider === 'gemini') {
+            return new ChatGoogleGenerativeAI({
+                model,
+                maxOutputTokens: maxTokens,
+                apiKey,
+            })
         }
 
-        console.log('Processing chat with model:', model)
-        console.log('API key provided:', apiKey ? 'Yes' : 'No')
+        if (provider === 'nemotron') {
+            return new ChatOpenAI({
+                model,
+                maxTokens,
+                apiKey,
+                streaming: true,
+                configuration: {
+                    baseURL: 'https://integrate.api.nvidia.com/v1',
+                },
+            })
+        }
 
-        const gemini = new ChatGoogleGenerativeAI({
+        return new ChatOpenAI({
             model,
-            maxOutputTokens: parseInt(process.env.MAX_OUTPUT_TOKENS || '2048'),
-            apiKey
-        })
-
-        const openai = new ChatOpenAI({
-            model,
-            maxTokens: parseInt(process.env.MAX_OUTPUT_TOKENS || '2048'),
+            maxTokens,
             apiKey,
-            streaming: true
+            streaming: true,
         })
+    }
 
-        const llm = model.includes('gemini') ? gemini : openai;
-        console.log('Using LLM:', model.includes('gemini') ? 'Gemini' : 'OpenAI')
-
-        const { tools, accessConfig } = await this.getToolsAndAccessConfig();
-
+    private buildAgentGraph(
+        model: string,
+        apiKey: string,
+        tools: StructuredTool[],
+        accessConfig: Record<string, boolean>,
+        resumeText?: string
+    ) {
+        const llm = this.createLLM(model, apiKey)
         const user = this.user
-
-        // Validate each tool's schema structure
-        console.log('Validating tool schemas...')
-        console.log('Model being used:', model)
-        for (const tool of tools) {
-            try {
-                if (!tool.schema || !(tool.schema as any)._def) {
-                    console.error(`Tool ${tool.name} has invalid schema structure:`, tool.schema)
-                }
-            } catch (error) {
-                console.error(`Error validating tool ${tool.name}:`, error)
-            }
-        }
-
-        let llmWithTools: any;
-        try {
-            // Try binding tools - if it fails, continue without tools
-            console.log('Attempting to bind tools to LLM...')
-
-            // Check if this is Gemini or OpenAI
-            if (model.includes('gemini')) {
-                console.log('Using Gemini model - attempting tool binding')
-                // Gemini might have issues with certain tool formats
-                // Try with a subset first to identify the problematic tool
-                llmWithTools = llm.bindTools(tools);
-            } else {
-                console.log('Using OpenAI model - attempting tool binding')
-                llmWithTools = llm.bindTools(tools);
-            }
-            console.log('Successfully bound tools to LLM')
-        } catch (error: any) {
-            console.error('Error binding tools to LLM:', error)
-            console.error('Error stack:', error.stack)
-            console.error('Model:', model)
-            console.error('LLM type:', llm.constructor.name)
-            console.error('Number of tools:', tools.length)
-
-            // Try to identify which tool is causing the issue
-            console.log('Testing tools individually...')
-            for (let i = 0; i < tools.length; i++) {
-                try {
-                    const testLlm = model.includes('gemini') ?
-                        new ChatGoogleGenerativeAI({ model, maxOutputTokens: 2048, apiKey }) :
-                        new ChatOpenAI({ model, maxTokens: 2048, apiKey });
-                    testLlm.bindTools([tools[i]]);
-                    console.log(`✓ Tool ${i}: ${tools[i].name} - OK`)
-                } catch (e) {
-                    console.error(`✗ Tool ${i}: ${tools[i].name} - FAILED`, e)
-                }
-            }
-
-            throw error
-        }
-
+        const llmWithTools = tools.length > 0 ? llm.bindTools(tools) : llm
 
         async function llmCall(state: typeof MessagesAnnotation.State) {
             const result = await llmWithTools.invoke([
                 {
                     role: "system",
-                    content: getSystemPrompt(user.name, user.email, accessConfig),
+                    content: getSystemPrompt(user.name, user.email, accessConfig, resumeText),
                 },
                 ...state.messages,
             ]);
@@ -379,16 +252,14 @@ export class ChatService {
         const toolNode = new ToolNode(tools);
 
         function shouldContinue(state: typeof MessagesAnnotation.State) {
-            const messages = state.messages;
-            const lastMessage = messages.at(-1);
-
+            const lastMessage = state.messages.at(-1);
             if ((lastMessage as any)?.tool_calls?.length) {
                 return "Action";
             }
             return "__end__";
         }
 
-        const agentBuilder = new StateGraph(MessagesAnnotation)
+        return new StateGraph(MessagesAnnotation)
             .addNode("llmCall", llmCall)
             .addNode("tools", toolNode)
             .addEdge("__start__", "llmCall")
@@ -402,40 +273,123 @@ export class ChatService {
             )
             .addEdge("tools", "llmCall")
             .compile();
+    }
 
+    async processChat(request: ChatRequest): Promise<ReadableStream> {
+        const {
+            messages,
+            threadId,
+            model,
+            apiKey,
+            fallbackModel,
+            fallbackApiKey,
+            webhooks,
+            resumeText,
+            streamEvents = false,
+            ephemeral = false,
+        } = request
+
+        if (!apiKey) {
+            throw new Error('API key is required')
+        }
+
+        const { tools, accessConfig } = await this.getToolsAndAccessConfig(webhooks, resumeText);
         const langChainMessages = this.convertMessagesToLangChain(messages);
+        const encoder = new TextEncoder();
+
+        const emitEvent = (
+            controller: ReadableStreamDefaultController,
+            payload: Record<string, unknown>
+        ) => {
+            if (streamEvents) {
+                controller.enqueue(encoder.encode(JSON.stringify(payload) + '\n'));
+            }
+        };
+
+        const runAgentStream = async (
+            activeModel: string,
+            activeKey: string,
+            controller: ReadableStreamDefaultController
+        ): Promise<string> => {
+            const agent = this.buildAgentGraph(activeModel, activeKey, tools, accessConfig, resumeText);
+            const eventStream = agent.streamEvents(
+                { messages: langChainMessages },
+                { version: "v1" },
+            );
+
+            let completeResponse = '';
+            const toolStartTimes = new Map<string, number>();
+
+            for await (const event of eventStream) {
+                if (event.event === "on_tool_start") {
+                    const toolName = event.name || 'tool';
+                    const runKey = `${toolName}:${event.run_id || ''}`;
+                    toolStartTimes.set(runKey, Date.now());
+                    emitEvent(controller, { type: "tool_start", tool: toolName });
+                } else if (event.event === "on_tool_end") {
+                    const toolName = event.name || 'tool';
+                    const runKey = `${toolName}:${event.run_id || ''}`;
+                    const started = toolStartTimes.get(runKey);
+                    const durationMs = started ? Date.now() - started : undefined;
+                    emitEvent(controller, { type: "tool_end", tool: toolName, durationMs });
+                } else if (event.event === "on_llm_stream" || event.event === "on_chat_model_stream") {
+                    const token = extractChunkText(event.data?.chunk);
+                    if (token) {
+                        completeResponse += token;
+                        if (streamEvents) {
+                            emitEvent(controller, { type: "token", text: token });
+                        } else {
+                            controller.enqueue(encoder.encode(token));
+                        }
+                    }
+                }
+            }
+
+            return completeResponse;
+        };
 
         return new ReadableStream({
             start: async (controller) => {
+                let completeResponse = '';
                 try {
-                    const eventStream = agentBuilder.streamEvents(
-                        { messages: langChainMessages },
-                        { version: "v1" },
-                    );
-
-                    let completeResponse = ''
-                    for await (const event of eventStream) {
-                        if (event.event === "on_llm_stream") {
-                            // Handle both Gemini and OpenAI token formats
-                            const token = event.data?.chunk?.content || event.data?.chunk?.text || '';
-                            if (token) {
-                                controller.enqueue(new TextEncoder().encode(token));
-                                completeResponse += token;
+                    try {
+                        completeResponse = await runAgentStream(model, apiKey, controller);
+                    } catch (primaryErr: any) {
+                        if (
+                            fallbackModel &&
+                            fallbackApiKey &&
+                            fallbackModel !== model &&
+                            isFailoverEligibleError(primaryErr)
+                        ) {
+                            console.warn(`Primary model ${model} failed, failing over to ${fallbackModel}:`, primaryErr?.message);
+                            emitEvent(controller, {
+                                type: "failover",
+                                from: model,
+                                to: fallbackModel,
+                            });
+                            if (!streamEvents) {
+                                controller.enqueue(
+                                    encoder.encode(`\n\n*[Auto-switched from ${model} to ${fallbackModel} due to rate limit]*\n\n`)
+                                );
                             }
+                            completeResponse = await runAgentStream(fallbackModel, fallbackApiKey, controller);
+                        } else {
+                            throw primaryErr;
                         }
                     }
 
-                    await this.conversationService.saveAssistantMessage(threadId, completeResponse)
+                    if (completeResponse && !ephemeral) {
+                        await this.conversationService.saveAssistantMessage(threadId, completeResponse)
+                    }
                     controller.close()
                 } catch (err: any) {
                     console.error("Streaming error:", err);
-                    console.error("Error details:", {
-                        message: err.message,
-                        stack: err.stack,
-                        name: err.name
-                    });
                     const errorMessage = `Error: ${err.message || 'Failed to generate response'}`;
-                    controller.enqueue(new TextEncoder().encode(errorMessage));
+                    if (streamEvents) {
+                        emitEvent(controller, { type: "error", message: errorMessage });
+                    } else {
+                        controller.enqueue(encoder.encode(errorMessage));
+                    }
                     controller.close();
                 }
             }
@@ -446,26 +400,25 @@ export class ChatService {
         const { threadId, userId } = request;
 
         const conversation = await prisma.conversation.findFirst({
-            where: ({
+            where: {
                 threadId,
                 userId,
                 isDeleted: false,
                 deletedAt: null,
-            } as any)
+            }
         })
 
         if (!conversation) {
             throw new Error('CONVERSATION_NOT_FOUND_OR_DELETED')
         }
 
-        const conversationAny: any = conversation as any
-        if (conversationAny?.isDeleted || conversationAny?.deletedAt) {
-            throw new Error('CONVERSATION_NOT_FOUND_OR_DELETED')
-        }
-
         return await prisma.message.findMany({
             where: {
                 threadId,
+                isDeleted: false,
+            },
+            orderBy: {
+                timestamp: 'asc'
             }
         })
     }

@@ -15,6 +15,10 @@ export class ConversationService {
             conversation = await prisma.conversation.create({
                 data: { threadId, title, userId }
             })
+        } else if (conversation.userId !== userId) {
+            const error = new Error('FORBIDDEN')
+                ; (error as any).code = 'FORBIDDEN'
+            throw error
         }
 
         const convAny: any = conversation as any

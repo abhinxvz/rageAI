@@ -5,6 +5,18 @@ export interface APIKeys {
   gemini?: {
     key: string
   }
+  nemotron?: {
+    key: string
+  }
+  webhooks?: {
+    discord?: string
+    slack?: string
+  }
+  resume?: {
+    text: string
+    fileName?: string
+    targetRole?: string
+  }
 }
 
 const API_KEYS_STORAGE_KEY = 'rage-ai-api-keys'
@@ -33,23 +45,29 @@ export function setAPIKeys(keys: APIKeys): void {
 
 export function hasValidAPIKey(): boolean {
   const keys = getAPIKeys()
-  return !!(keys.openai?.key || keys.gemini?.key)
+  return Boolean(
+    keys.openai?.key?.trim() ||
+    keys.gemini?.key?.trim() ||
+    keys.nemotron?.key?.trim()
+  )
 }
 
 export function getOpenAIKey(): string | undefined {
-  return getAPIKeys().openai?.key
+  return getAPIKeys().openai?.key?.trim() || undefined
 }
 
 export function getGeminiKey(): string | undefined {
-  return getAPIKeys().gemini?.key
+  return getAPIKeys().gemini?.key?.trim() || undefined
 }
 
-// These functions are no longer needed since we don't store models
-// The application will automatically use the best available models
-export function getOpenAIModel(): string {
-  return 'gpt-4o' // Default to best available model
+export function getNemotronKey(): string | undefined {
+  return getAPIKeys().nemotron?.key?.trim() || undefined
 }
 
-export function getGeminiModel(): string {
-  return 'gemini-1.5-flash' // Default to best available model
-} 
+export function getConfiguredModelCount(keys: APIKeys): number {
+  let count = 0
+  if (keys.gemini?.key?.trim()) count += 1
+  if (keys.nemotron?.key?.trim()) count += 1
+  if (keys.openai?.key?.trim()) count += 1
+  return count
+}
