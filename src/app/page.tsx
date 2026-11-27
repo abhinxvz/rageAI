@@ -338,6 +338,9 @@ export default function LandingPage() {
           <a href="#architecture" className="hover:text-zinc-200 transition-colors">
             Models
           </a>
+          <Link href="/careers" className="text-red-400 hover:text-red-300 transition-colors">
+            Careers
+          </Link>
         </div>
 
         <Link
@@ -853,6 +856,9 @@ export default function LandingPage() {
                   <a href="#architecture" className="hover:text-white transition-colors">
                     Models
                   </a>
+                  <Link href="/careers" className="text-red-400 hover:text-red-300 transition-colors">
+                    Careers
+                  </Link>
                   <Link href="/auth/signin" className="hover:text-white transition-colors">
                     Sign in
                   </Link>
