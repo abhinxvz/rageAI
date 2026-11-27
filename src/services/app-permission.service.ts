@@ -148,13 +148,16 @@ export class AppPermissionService {
         scopes: string[]
     ): Promise<void> {
         const appConfig = APP_CONFIGURATIONS[appId as keyof typeof APP_CONFIGURATIONS]
+        if (!appConfig) {
+            throw new Error(`Unknown app: ${appId}`)
+        }
         const expiryDate = new Date(expiresAt)
 
         await prisma.userAppPermission.upsert({
             where: { userId_appId: { userId, appId } },
             update: {
                 accessToken,
-                refreshToken: refreshToken || null,
+                ...(refreshToken ? { refreshToken } : {}),
                 expiresAt: expiryDate,
                 scopes,
                 isConnected: true,
@@ -169,38 +172,6 @@ export class AppPermissionService {
                 refreshToken: refreshToken || null,
                 expiresAt: expiryDate,
                 scopes,
-                isConnected: true,
-                connectedAt: new Date(),
-                lastUsedAt: new Date()
-            }
-        })
-    }
-
-    async storeDirectToken(userId: string, appId: string, token: string): Promise<void> {
-        const appConfig = APP_CONFIGURATIONS[appId as keyof typeof APP_CONFIGURATIONS]
-
-        // For GitHub and Notion, tokens don't expire
-        const expiryDate = new Date(Date.now() + (365 * 24 * 60 * 60 * 1000)) // 1 year
-
-        await prisma.userAppPermission.upsert({
-            where: { userId_appId: { userId, appId } },
-            update: {
-                accessToken: token,
-                refreshToken: null,
-                expiresAt: expiryDate,
-                scopes: appConfig.scopes,
-                isConnected: true,
-                connectedAt: new Date(),
-                lastUsedAt: new Date()
-            },
-            create: {
-                userId,
-                appId,
-                appName: appConfig.name,
-                accessToken: token,
-                refreshToken: null,
-                expiresAt: expiryDate,
-                scopes: appConfig.scopes,
                 isConnected: true,
                 connectedAt: new Date(),
                 lastUsedAt: new Date()
@@ -227,67 +198,19 @@ export class AppPermissionService {
             throw new Error(`Unknown app: ${appId}`)
         }
 
-        // Handle GitHub OAuth
-        if (appConfig.provider === 'github') {
-            const clientId = process.env.GITHUB_CLIENT_ID!
-            const scopes = appConfig.scopes.join(' ')
-            const state = Buffer.from(JSON.stringify({ appId, userId })).toString('base64')
-
-            return `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&state=${state}`
-        }
-
-        // Handle Notion OAuth
-        if (appConfig.provider === 'notion') {
-            const clientId = process.env.NOTION_CLIENT_ID!
-            const state = Buffer.from(JSON.stringify({ appId, userId })).toString('base64')
-
-            return `https://api.notion.com/v1/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&owner=user&state=${state}`
-        }
-
-        // Handle Spotify OAuth
-        if (appConfig.provider === 'spotify') {
-            const clientId = process.env.SPOTIFY_CLIENT_ID!
-            const scopes = appConfig.scopes.join(' ')
-            const state = Buffer.from(JSON.stringify({ appId, userId })).toString('base64')
-
-            return `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&state=${state}`
-        }
-
-        // Handle Twitter OAuth 2.0
-        if (appConfig.provider === 'twitter') {
-            const clientId = process.env.TWITTER_CLIENT_ID!
-            const scopes = appConfig.scopes.join(' ')
-            const state = Buffer.from(JSON.stringify({ appId, userId })).toString('base64')
-
-            // Twitter OAuth 2.0 with PKCE
-            return `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&state=${state}&code_challenge=challenge&code_challenge_method=plain`
-        }
-
-        // Handle Instagram OAuth
-        if (appConfig.provider === 'instagram') {
-            const clientId = process.env.INSTAGRAM_CLIENT_ID!
-            const scopes = appConfig.scopes.join(',')
-            const state = Buffer.from(JSON.stringify({ appId, userId })).toString('base64')
-
-            return `https://api.instagram.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}&response_type=code&state=${state}`
-        }
-
-        // Handle Google OAuth (Gmail, Calendar, Docs)
         const oauth2Client = new google.auth.OAuth2(
             process.env.GOOGLE_CLIENT_ID!,
             process.env.GOOGLE_CLIENT_SECRET!,
             redirectUri
         )
 
-        const authUrl = oauth2Client.generateAuthUrl({
+        return oauth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: appConfig.scopes,
             prompt: 'consent',
             state: JSON.stringify({ appId, userId }),
             login_hint: email
         })
-
-        return authUrl
     }
 
     async getAvailableApps(userId: string) {

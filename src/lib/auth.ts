@@ -7,8 +7,6 @@ import { google } from "googleapis"
 export const APP_CONFIGURATIONS = {
   gmail: {
     name: 'Gmail',
-    provider: 'google',
-    requiresOAuth: true,
     scopes: [
       'https://www.googleapis.com/auth/gmail.modify',
       'https://www.googleapis.com/auth/gmail.compose',
@@ -17,8 +15,6 @@ export const APP_CONFIGURATIONS = {
   },
   calendar: {
     name: 'Google Calendar',
-    provider: 'google',
-    requiresOAuth: true,
     scopes: [
       'https://www.googleapis.com/auth/calendar.events',
       'https://www.googleapis.com/auth/calendar.readonly'
@@ -26,100 +22,9 @@ export const APP_CONFIGURATIONS = {
   },
   docs: {
     name: 'Google Docs',
-    provider: 'google',
-    requiresOAuth: true,
     scopes: [
       'https://www.googleapis.com/auth/documents',
-      'https://www.googleapis.com/auth/drive.file',
-      'https://www.googleapis.com/auth/drive.readonly',
-      'https://www.googleapis.com/auth/drive.metadata.readonly'
-    ]
-  },
-  drive: {
-    name: 'Google Drive',
-    provider: 'google',
-    requiresOAuth: true,
-    scopes: [
-      'https://www.googleapis.com/auth/drive',
-      'https://www.googleapis.com/auth/drive.file',
-      'https://www.googleapis.com/auth/drive.readonly',
-      'https://www.googleapis.com/auth/drive.metadata.readonly'
-    ]
-  },
-  github: {
-    name: 'GitHub',
-    provider: 'github',
-    requiresOAuth: false,
-    scopes: [
-      'repo',
-      'delete_repo',
-      'admin:org',
-      'admin:public_key',
-      'admin:repo_hook',
-      'admin:org_hook',
-      'gist',
-      'notifications',
-      'user',
-      'delete:packages',
-      'write:packages',
-      'read:packages',
-      'admin:gpg_key',
-      'workflow'
-    ]
-  },
-  notion: {
-    name: 'Notion',
-    provider: 'notion',
-    requiresOAuth: false,
-    scopes: [] // Notion integrations have full access by default
-  },
-  spotify: {
-    name: 'Spotify',
-    provider: 'spotify',
-    requiresOAuth: true,
-    scopes: [
-      'user-read-private',
-      'user-read-email',
-      'user-top-read',
-      'user-read-recently-played',
-      'playlist-modify-public',
-      'playlist-modify-private',
-      'playlist-read-private',
-      'user-library-read'
-    ]
-  },
-  twitter: {
-    name: 'Twitter',
-    provider: 'twitter',
-    requiresOAuth: true,
-    scopes: [
-      'tweet.read',
-      'tweet.write',
-      'users.read',
-      'follows.read',
-      'follows.write',
-      'offline.access'
-    ]
-  },
-  instagram: {
-    name: 'Instagram',
-    provider: 'instagram',
-    requiresOAuth: true,
-    scopes: [
-      'instagram_basic',
-      'instagram_content_publish',
-      'pages_read_engagement',
-      'pages_show_list'
-    ]
-  },
-  discord: {
-    name: 'Discord',
-    provider: 'discord',
-    requiresOAuth: false,
-    scopes: [
-      'bot',
-      'messages.read',
-      'messages.write'
+      'https://www.googleapis.com/auth/drive.file'
     ]
   }
 }
@@ -149,20 +54,18 @@ export async function refreshAccessToken(refreshToken: string) {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  ...(process.env.DATABASE_URL ? { adapter: PrismaAdapter(prisma) } : {}),
+  secret:
+    process.env.NEXTAUTH_SECRET ||
+    (process.env.NODE_ENV !== 'production' ? 'rage-ai-dev-secret-change-me' : undefined),
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       authorization: {
         params: {
-          scope: [
-            "openid",
-            "email",
-            "profile"
-          ].join(" "),
-          access_type: "offline",
-          prompt: "consent"
+          scope: "openid email profile",
+          prompt: "select_account"
         }
       },
       httpOptions: {
@@ -171,24 +74,16 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
-      // Waitlist check disabled - allow all users
+    async signIn() {
       return true
     },
-    async jwt({ token, account, trigger, user }) {
+    async jwt({ token, account, user }) {
       if (account) {
         token.accessToken = account.access_token
         token.refreshToken = account.refresh_token
-        token.expiresAt = account.expires_at
-        token.userId = user?.id
-
-        if (user?.email) {
-          const waitlistEntry = await prisma.waitlist.findUnique({
-            where: { email: user.email }
-          })
-          token.waitlistStatus = waitlistEntry?.status || null
-        }
-
+        // NextAuth provides account.expires_at in seconds; convert to ms for Date.now() comparison
+        token.expiresAt = account.expires_at ? account.expires_at * 1000 : undefined
+        token.userId = user?.id || token.sub
       }
 
       if (token.expiresAt && typeof token.expiresAt === 'number' && Date.now() > token.expiresAt - 60000) {
@@ -213,8 +108,7 @@ export const authOptions: NextAuthOptions = {
       session.accessToken = token.accessToken as string
       session.refreshToken = token.refreshToken as string
       session.expiresAt = token.expiresAt as number
-      session.userId = token.userId as string
-      session.waitlistStatus = token.waitlistStatus as 'APPROVED' | 'PENDING' | 'REJECTED' | null
+      session.userId = (token.userId || token.sub) as string
       return session
     }
   },

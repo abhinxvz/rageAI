@@ -16,7 +16,8 @@ export async function POST(req: NextRequest) {
         }
 
         const appPermissionService = new AppPermissionService()
-        const redirectUri = `${process.env.NEXTAUTH_URL}/api/auth/callback/google-app`
+        const baseUrl = process.env.NEXTAUTH_URL || new URL(req.url).origin
+        const redirectUri = `${baseUrl}/api/auth/callback/google-app`
 
         const authUrl = appPermissionService.generateAppOAuthUrl(
             appId,
