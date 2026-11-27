@@ -35,10 +35,10 @@ export const TextHoverEffect = ({
       className="select-none"
     >
       <defs>
-        <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#1072f8" />
-          <stop offset="50%" stopColor="#3b8fff" />
-          <stop offset="100%" stopColor="#1072f8" />
+        <linearGradient id="redGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#dc2626" />
+          <stop offset="50%" stopColor="#ff5757" />
+          <stop offset="100%" stopColor="#ef4444" />
         </linearGradient>
 
         <radialGradient id="revealGradient">
@@ -91,7 +91,7 @@ export const TextHoverEffect = ({
         textAnchor="middle"
         dominantBaseline="middle"
         strokeWidth="0.5"
-        stroke="url(#blueGradient)"
+        stroke="url(#redGradient)"
         fill="none"
         className="font-[helvetica] font-bold text-7xl"
         mask="url(#textMask)"

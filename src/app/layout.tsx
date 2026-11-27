@@ -1,16 +1,12 @@
-import { Montserrat } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/sonner'
-import { Protection } from '@/components/protection'
 
 export const dynamic = 'force-dynamic'
 
-const montserrat = Montserrat({ subsets: ['latin'] })
-
 export const metadata = {
   title: 'Rage AI',
-  description: 'Your personal AI assistant',
+  description: 'Your personal AI workspace assistant',
 }
 
 export default function RootLayout({
@@ -22,7 +18,6 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body>
         <Providers>
-          <Protection />
           {children}
           <Toaster />
         </Providers>
