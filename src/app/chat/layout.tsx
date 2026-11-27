@@ -6,11 +6,8 @@ import { useEffect, useState } from "react"
 import { ChatSidebar } from "@/components/chat/ChatSidebar"
 import ChatInterface from "@/components/chat/ChatInterface"
 import { Button } from "@/components/ui/button"
-import {
-    Menu,
-} from "lucide-react"
+import { Loader2, Menu } from "lucide-react"
 import { twMerge } from "tailwind-merge"
-
 import { AnimatePresence, motion } from "motion/react"
 import AppsSidebar from "@/components/chat/app-sidebar"
 
@@ -26,28 +23,35 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         if (status === "unauthenticated") {
             router.push("/auth/signin")
         }
-    }, [status, session, router])
-
-
+    }, [status, router])
 
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen)
     }
 
+    if (status === "loading") {
+        return (
+            <div className="h-screen flex items-center justify-center bg-[#0b0909]">
+                <Loader2 className="h-7 w-7 animate-spin text-red-500" />
+            </div>
+        )
+    }
+
     if (!session) {
         return null
     }
+
     return (
-        <div className="h-screen relative flex bg-[#0a0a0a] overflow-hidden">
+        <div className="h-screen relative flex bg-[#0b0909] overflow-hidden">
             <AnimatePresence initial={false}>
-                {(sidebarOpen || true) && (
+                {sidebarOpen && (
                     <motion.div
                         key="sidebar"
                         initial={{ width: 0, opacity: 0 }}
-                        animate={{ width: sidebarOpen ? 280 : 0, opacity: sidebarOpen ? 1 : 0 }}
+                        animate={{ width: 280, opacity: 1 }}
                         exit={{ width: 0, opacity: 0 }}
-                        transition={{ width: { duration: 0.3 }, opacity: { duration: 0.2 } }}
-                        className="overflow-hidden flex-shrink-0 bg-[#0f0f0f] border-r border-white/5"
+                        transition={{ width: { duration: 0.25 }, opacity: { duration: 0.2 } }}
+                        className="overflow-hidden flex-shrink-0 bg-[#100c0c] border-r border-white/[0.07]"
                         style={{ minWidth: 0 }}
                     >
                         <ChatSidebar
@@ -61,19 +65,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 variant="ghost"
                 size="icon"
                 onClick={toggleSidebar}
-                className={twMerge("h-10 w-10 absolute left-4 z-50 top-5 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg", sidebarOpen ? "" : "bg-white/5")}
+                className={twMerge(
+                    "h-10 w-10 absolute left-4 z-50 top-5 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg",
+                    sidebarOpen ? "" : "bg-white/5"
+                )}
             >
                 <Menu className="h-5 w-5" />
             </Button>
 
-            <div className="flex-1 w-full bg-[#0a0a0a]">
-                <ChatInterface
-                    threadId={params?.threadId as string}
-                />
+            <div className="flex-1 w-full bg-[#0b0909]">
+                <ChatInterface threadId={params?.threadId as string} />
+                {children}
             </div>
 
             <AppsSidebar />
-
         </div>
     )
 }

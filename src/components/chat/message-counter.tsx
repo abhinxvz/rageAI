@@ -9,12 +9,12 @@ export function MessageCounter({ userMessageCount, maxUserMessagesPerChat, isMes
         <div className="flex items-center gap-1 ml-auto">
             <div
                 className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${isMessageLimitReached
-                    ? 'bg-[#1072f8]/20 text-[#3b8fff]'
+                    ? 'bg-red-500/20 text-red-400'
                     : userMessageCount >= Math.floor(maxUserMessagesPerChat * 0.8)
-                        ? 'bg-[#1072f8]/20 text-[#3b8fff]'
+                        ? 'bg-red-500/20 text-red-400'
                         : userMessageCount >= Math.floor(maxUserMessagesPerChat / 2)
-                            ? 'bg-[#1072f8]/10 text-[#3b8fff]'
-                            : 'bg-[#1a1a1a] text-gray-400'
+                            ? 'bg-red-500/10 text-red-400'
+                            : 'bg-[#161111] text-zinc-400'
                     }`}
                 title={
                     isMessageLimitReached
@@ -28,13 +28,13 @@ export function MessageCounter({ userMessageCount, maxUserMessagesPerChat, isMes
             >
                 <span>{userMessageCount}/{maxUserMessagesPerChat}</span>
                 {isMessageLimitReached && (
-                    <span className="text-[#3b8fff]">•</span>
+                    <span className="text-red-400">•</span>
                 )}
                 {userMessageCount >= Math.floor(maxUserMessagesPerChat * 0.8) && !isMessageLimitReached && (
-                    <span className="text-[#3b8fff]">!</span>
+                    <span className="text-red-400">!</span>
                 )}
                 {userMessageCount >= Math.floor(maxUserMessagesPerChat / 2) && userMessageCount < Math.floor(maxUserMessagesPerChat * 0.8) && (
-                    <span className="text-[#3b8fff]">•</span>
+                    <span className="text-red-400">•</span>
                 )}
             </div>
         </div>
