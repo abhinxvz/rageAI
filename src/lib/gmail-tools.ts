@@ -20,11 +20,12 @@ Input should include:
 Example: To send an email to john@example.com with subject "Meeting" and message "Let's meet at 3pm", use this tool.`;
 
   schema = z.object({
-    to: z.string().describe("Recipient email address"),
+    to: z.string().email().describe("Recipient email address"),
     subject: z.string().describe("Email subject line"),
     message: z.string().describe("Email body content"),
     cc: z.string().optional().describe("CC recipients (comma-separated)"),
     bcc: z.string().optional().describe("BCC recipients (comma-separated)"),
+    confirmed: z.boolean().optional().default(false).describe("Set to true ONLY after the user explicitly confirms recipient, subject, and body in chat"),
   });
 
   private gmailTool: LangChainGmailSendMessage;
@@ -35,6 +36,9 @@ Example: To send an email to john@example.com with subject "Meeting" and message
   }
 
   async _call(input: z.infer<typeof this.schema>): Promise<string> {
+    if (!input.confirmed) {
+      return `CONFIRMATION_REQUIRED: Show recipient (${input.to}), subject ("${input.subject}"), and body to the user and ask for explicit confirmation before calling gmail_send_email with confirmed=true.`;
+    }
     try {
       // Convert string inputs to arrays as expected by LangChain Gmail tool
       const gmailInput = {

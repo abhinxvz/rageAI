@@ -1,8 +1,8 @@
-
-
+import crypto from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { google } from 'googleapis'
 import { APP_CONFIGURATIONS } from '@/lib/auth'
+import { decryptSecret, encryptSecret, signOAuthState } from '@/lib/crypto'
 
 export interface AppPermission {
     id: string
@@ -61,7 +61,7 @@ export class AppPermissionService {
                     )
 
                     oauth2Client.setCredentials({
-                        refresh_token: permission.refreshToken
+                        refresh_token: decryptSecret(permission.refreshToken)
                     })
 
                     const { credentials } = await oauth2Client.refreshAccessToken()
@@ -69,7 +69,7 @@ export class AppPermissionService {
                     await prisma.userAppPermission.update({
                         where: { id: permission.id },
                         data: {
-                            accessToken: credentials.access_token!,
+                            accessToken: encryptSecret(credentials.access_token!),
                             expiresAt: new Date(credentials.expiry_date!),
                             lastUsedAt: new Date()
                         }
@@ -90,7 +90,7 @@ export class AppPermissionService {
             data: { lastUsedAt: new Date() }
         })
 
-        return permission.accessToken
+        return decryptSecret(permission.accessToken)
     }
 
     async getAppMetadata(userId: string, appId: string): Promise<any> {
@@ -111,11 +111,14 @@ export class AppPermissionService {
         expiresAt: Date | null
         metadata?: any
     }): Promise<void> {
+        const encryptedAccess = encryptSecret(data.accessToken)
+        const encryptedRefresh = data.refreshToken ? encryptSecret(data.refreshToken) : null
+
         await prisma.userAppPermission.upsert({
             where: { userId_appId: { userId: data.userId, appId: data.appId } },
             update: {
-                accessToken: data.accessToken,
-                refreshToken: data.refreshToken,
+                accessToken: encryptedAccess,
+                refreshToken: encryptedRefresh,
                 expiresAt: data.expiresAt,
                 scopes: data.scopes,
                 isConnected: true,
@@ -127,8 +130,8 @@ export class AppPermissionService {
                 userId: data.userId,
                 appId: data.appId,
                 appName: data.appName,
-                accessToken: data.accessToken,
-                refreshToken: data.refreshToken,
+                accessToken: encryptedAccess,
+                refreshToken: encryptedRefresh,
                 expiresAt: data.expiresAt,
                 scopes: data.scopes,
                 isConnected: true,
@@ -152,12 +155,14 @@ export class AppPermissionService {
             throw new Error(`Unknown app: ${appId}`)
         }
         const expiryDate = new Date(expiresAt)
+        const encryptedAccess = encryptSecret(accessToken)
+        const encryptedRefresh = refreshToken ? encryptSecret(refreshToken) : null
 
         await prisma.userAppPermission.upsert({
             where: { userId_appId: { userId, appId } },
             update: {
-                accessToken,
-                ...(refreshToken ? { refreshToken } : {}),
+                accessToken: encryptedAccess,
+                ...(encryptedRefresh ? { refreshToken: encryptedRefresh } : {}),
                 expiresAt: expiryDate,
                 scopes,
                 isConnected: true,
@@ -168,8 +173,8 @@ export class AppPermissionService {
                 userId,
                 appId,
                 appName: appConfig.name,
-                accessToken,
-                refreshToken: refreshToken || null,
+                accessToken: encryptedAccess,
+                refreshToken: encryptedRefresh,
                 expiresAt: expiryDate,
                 scopes,
                 isConnected: true,
@@ -191,7 +196,12 @@ export class AppPermissionService {
         })
     }
 
-    generateAppOAuthUrl(appId: string, userId: string, redirectUri: string, email: string): string {
+    generateAppOAuthUrl(
+        appId: string,
+        userId: string,
+        redirectUri: string,
+        email: string
+    ): { authUrl: string; nonce: string } {
         const appConfig = APP_CONFIGURATIONS[appId as keyof typeof APP_CONFIGURATIONS]
 
         if (!appConfig) {
@@ -204,13 +214,23 @@ export class AppPermissionService {
             redirectUri
         )
 
-        return oauth2Client.generateAuthUrl({
+        const nonce = crypto.randomBytes(16).toString('hex')
+        const state = signOAuthState({
+            appId,
+            userId,
+            nonce,
+            exp: Date.now() + 10 * 60 * 1000,
+        })
+
+        const authUrl = oauth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: appConfig.scopes,
             prompt: 'consent',
-            state: JSON.stringify({ appId, userId }),
+            state,
             login_hint: email
         })
+
+        return { authUrl, nonce }
     }
 
     async getAvailableApps(userId: string) {

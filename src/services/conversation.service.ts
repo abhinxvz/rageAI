@@ -1,37 +1,34 @@
-
 import { prisma } from '@/lib/prisma'
 import { config } from '@/lib/config'
 
-
 export class ConversationService {
-    async ensureConversation(threadId: string, userId: string, messages: any[], model: string, apiKey: string) {
+    async ensureConversation(threadId: string, userId: string, messages: { role: string; content: string }[], model: string, apiKey: string) {
         let conversation = await prisma.conversation.findUnique({
             where: { threadId }
         })
 
-        const title = conversation?.title || await this._generateTitle(messages[messages.length - 1]?.content, model, apiKey)
+        const title = conversation?.title || await this._generateTitle(messages[messages.length - 1]?.content || 'New Chat', model, apiKey)
 
         if (!conversation) {
             conversation = await prisma.conversation.create({
-                data: { threadId, title, userId }
+                data: { threadId, title: title.slice(0, 120), userId }
             })
         } else if (conversation.userId !== userId) {
             const error = new Error('FORBIDDEN')
-                ; (error as any).code = 'FORBIDDEN'
+            ;(error as any).code = 'FORBIDDEN'
             throw error
         }
 
-        const convAny: any = conversation as any
-        if (convAny?.isDeleted || convAny?.deletedAt) {
+        if (conversation.isDeleted || conversation.deletedAt) {
             const error = new Error('CONVERSATION_DELETED')
-                ; (error as any).code = 'DELETED'
+            ;(error as any).code = 'DELETED'
             throw error
         }
 
-        if (!conversation.title) {
+        if (!conversation.title && title) {
             await prisma.conversation.update({
                 where: { threadId },
-                data: { title }
+                data: { title: title.slice(0, 120) }
             })
         }
 
@@ -40,7 +37,7 @@ export class ConversationService {
 
     async checkMessageLimit(threadId: string): Promise<Response | null> {
         const existingUserMessages = await prisma.message.count({
-            where: { threadId, role: 'user' }
+            where: { threadId, role: 'user', isDeleted: false }
         })
 
         if (existingUserMessages >= config.maxUserMessagesPerChat) {
@@ -53,6 +50,60 @@ export class ConversationService {
         }
 
         return null
+    }
+
+    async verifyEphemeralAccess(threadId: string, userId: string): Promise<'allowed' | 'forbidden' | 'deleted' | 'limit'> {
+        const conversation = await prisma.conversation.findUnique({
+            where: { threadId },
+            select: { userId: true, isDeleted: true, deletedAt: true }
+        })
+
+        if (!conversation) {
+            return 'allowed'
+        }
+        if (conversation.userId !== userId) {
+            return 'forbidden'
+        }
+        if (conversation.isDeleted || conversation.deletedAt) {
+            return 'deleted'
+        }
+
+        const existingUserMessages = await prisma.message.count({
+            where: { threadId, role: 'user', isDeleted: false }
+        })
+        if (existingUserMessages > config.maxUserMessagesPerChat) {
+            return 'limit'
+        }
+
+        return 'allowed'
+    }
+
+    async getAuthoritativeHistory(threadId: string, userId: string): Promise<{ role: string; content: string }[]> {
+        const conversation = await prisma.conversation.findFirst({
+            where: {
+                threadId,
+                userId,
+                isDeleted: false,
+                deletedAt: null,
+            },
+            select: { threadId: true }
+        })
+
+        if (!conversation) {
+            return []
+        }
+
+        const dbMessages = await prisma.message.findMany({
+            where: {
+                threadId,
+                isDeleted: false,
+            },
+            orderBy: { timestamp: 'asc' },
+            take: 60,
+            select: { role: true, content: true }
+        })
+
+        return dbMessages.filter((m) => m.role === 'user' || m.role === 'assistant')
     }
 
     async saveUserMessage(threadId: string, content: string) {
@@ -77,33 +128,20 @@ export class ConversationService {
         })
     }
 
-    private async _generateTitle(firstMessage: string, model: string, apiKey: string): Promise<string> {
-        // const titleSchema = z.object({
-        //     title: z.string().describe('The title of the conversation')
-        // })
-        // const resullt = await generateObject({
-        //     model: getAiModel(apiKey, model) as LanguageModel,
-        //     system: getTitleGenerationPrompt(firstMessage),
-        //     schema: titleSchema,
-        //     messages: [{
-        //         role: 'user',
-        //         content: firstMessage
-        //     }]
-
-        // })
-        return firstMessage;
-        // const title = resullt.object.title || firstMessage?.length > 50 ? firstMessage.slice(0, 50).trim() : firstMessage
-
+    private async _generateTitle(firstMessage: string, _model: string, _apiKey: string): Promise<string> {
+        return firstMessage
     }
 
     async getUserConversations(userId: string, search?: string) {
+        const cleanSearch = search?.trim().slice(0, 100) || undefined
         const conversations = await prisma.conversation.findMany({
             where: {
                 userId,
                 isDeleted: false,
-                title: { contains: search?.trim(), mode: 'insensitive' }
+                ...(cleanSearch ? { title: { contains: cleanSearch, mode: 'insensitive' } } : {})
             },
             orderBy: { updatedAt: 'desc' },
+            take: 50,
             select: {
                 threadId: true,
                 title: true,
@@ -129,7 +167,7 @@ export class ConversationService {
 
         if (!existing) {
             const error = new Error('Conversation not found')
-                ; (error as any).code = 'NOT_FOUND'
+            ;(error as any).code = 'NOT_FOUND'
             throw error
         }
 

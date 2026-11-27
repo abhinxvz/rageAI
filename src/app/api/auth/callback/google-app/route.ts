@@ -3,6 +3,21 @@ import { getServerSession } from 'next-auth'
 import { google } from 'googleapis'
 import { authOptions } from '@/lib/auth'
 import { AppPermissionService } from '@/services/app-permission.service'
+import { safeEqualStrings, verifyOAuthState } from '@/lib/crypto'
+
+const OAUTH_NONCE_COOKIE = 'rageai_app_oauth_nonce'
+
+function redirectAndClearNonce(url: URL): NextResponse {
+    const res = NextResponse.redirect(url)
+    res.cookies.set(OAUTH_NONCE_COOKIE, '', {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/api/auth/callback/google-app',
+        maxAge: 0,
+    })
+    return res
+}
 
 export async function GET(req: NextRequest) {
     try {
@@ -17,16 +32,23 @@ export async function GET(req: NextRequest) {
         const error = searchParams.get('error')
 
         if (error) {
-            return NextResponse.redirect(new URL('/chat?error=access_denied', req.url))
+            return redirectAndClearNonce(new URL('/chat?error=access_denied', req.url))
         }
 
         if (!code || !state) {
-            return NextResponse.redirect(new URL('/chat?error=invalid_request', req.url))
+            return redirectAndClearNonce(new URL('/chat?error=invalid_request', req.url))
         }
 
-        const { appId, userId } = JSON.parse(state)
-        if (!appId || userId !== session.userId) {
-            return NextResponse.redirect(new URL('/chat?error=invalid_request', req.url))
+        const verifiedState = verifyOAuthState(state)
+        const cookieNonce = req.cookies.get(OAUTH_NONCE_COOKIE)?.value || ''
+
+        if (
+            !verifiedState ||
+            verifiedState.userId !== session.userId ||
+            !cookieNonce ||
+            !safeEqualStrings(verifiedState.nonce, cookieNonce)
+        ) {
+            return redirectAndClearNonce(new URL('/chat?error=invalid_request', req.url))
         }
 
         const baseUrl = process.env.NEXTAUTH_URL || new URL(req.url).origin
@@ -39,22 +61,24 @@ export async function GET(req: NextRequest) {
         const { tokens } = await oauth2Client.getToken(code)
 
         if (!tokens.access_token) {
-            return NextResponse.redirect(new URL('/chat?error=token_error', req.url))
+            return redirectAndClearNonce(new URL('/chat?error=token_error', req.url))
         }
 
         const appPermissionService = new AppPermissionService()
         await appPermissionService.storeAppPermission(
-            userId,
-            appId,
+            verifiedState.userId,
+            verifiedState.appId,
             tokens.access_token,
             tokens.refresh_token || '',
             tokens.expiry_date || Date.now() + 3600 * 1000,
             tokens.scope?.split(' ') || []
         )
 
-        return NextResponse.redirect(new URL(`/chat?connected=${encodeURIComponent(appId)}`, req.url))
+        return redirectAndClearNonce(
+            new URL(`/chat?connected=${encodeURIComponent(verifiedState.appId)}`, req.url)
+        )
     } catch (error) {
         console.error('Error handling Google app callback:', error)
-        return NextResponse.redirect(new URL('/chat?error=callback_error', req.url))
+        return redirectAndClearNonce(new URL('/chat?error=callback_error', req.url))
     }
 }

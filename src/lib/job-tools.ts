@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { StructuredTool } from "@langchain/core/tools"
 import * as cheerio from "cheerio"
-import { validatePublicHttpUrl, fetchWithTimeout } from "./url-safety"
+import { validatePublicHttpUrl, fetchWithTimeout, readTextWithLimit } from "./url-safety"
 
 export interface ScrapedJob {
   title: string
@@ -215,7 +215,7 @@ async function fetchCustomBoardJobs(boardUrl: string): Promise<ScrapedJob[]> {
   if (!res.ok) {
     throw new Error(`Failed to scrape careers page (${res.status})`)
   }
-  const html = await res.text()
+  const html = await readTextWithLimit(res)
   const $ = cheerio.load(html)
   $("script, style, nav, footer").remove()
 

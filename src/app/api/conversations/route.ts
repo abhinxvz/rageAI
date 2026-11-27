@@ -23,16 +23,11 @@ export async function GET(req: NextRequest) {
       headers: { 'Cache-Control': 'no-store' },
     })
   } catch (error: any) {
-    console.error('Conversations API error:', error)
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
+    console.error('Conversations API error:', {
+      message: error?.message,
+      name: error?.name
     })
-    return new Response(JSON.stringify({ 
-      error: error.message || 'Internal Server Error',
-      details: error.toString()
-    }), { 
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     })

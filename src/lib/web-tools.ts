@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { StructuredTool } from "@langchain/core/tools"
 import * as cheerio from "cheerio"
-import { validatePublicHttpUrl, fetchWithTimeout } from "./url-safety"
+import { validatePublicHttpUrl, fetchWithTimeout, readTextWithLimit } from "./url-safety"
 
 function extractYouTubeVideoId(input: string): string | null {
   const trimmed = input.trim()
@@ -62,14 +62,14 @@ export class WebPageReaderTool extends StructuredTool {
     }
 
     const contentType = response.headers.get("content-type") || ""
-    const rawBody = await response.text()
+    const rawBody = await readTextWithLimit(response)
 
     if (contentType.includes("application/json") || contentType.includes("text/plain")) {
-      return JSON.stringify({
+      return `<untrusted_external_data source="webpage">\n${JSON.stringify({
         url: parsed.toString(),
         contentType,
         content: rawBody.slice(0, 12000),
-      })
+      })}\n</untrusted_external_data>`
     }
 
     const $ = cheerio.load(rawBody)
@@ -91,13 +91,13 @@ export class WebPageReaderTool extends StructuredTool {
       .trim()
       .slice(0, 12000)
 
-    return JSON.stringify({
+    return `<untrusted_external_data source="webpage">\n${JSON.stringify({
       url: parsed.toString(),
       title,
       description,
       headings,
       content: mainText,
-    })
+    })}\n</untrusted_external_data>`
   }
 }
 
@@ -123,7 +123,7 @@ export class YouTubeTranscriptTool extends StructuredTool {
       throw new Error(`Failed to load YouTube page (${response.status})`)
     }
 
-    const html = await response.text()
+    const html = await readTextWithLimit(response, 2_000_000)
     const $ = cheerio.load(html)
     const title = $('meta[name="title"]').attr("content") || $("title").text().replace(" - YouTube", "").trim()
     const description = $('meta[name="description"]').attr("content") || ""

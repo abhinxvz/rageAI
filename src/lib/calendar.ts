@@ -193,7 +193,8 @@ export class GoogleCalendarDeleteEvent extends StructuredTool {
 
     schema = z.object({
         eventId: z.string().describe("The ID of the event to delete"),
-        sendUpdates: z.enum(['all', 'externalOnly', 'none']).optional().default('all').describe("Whether to send cancellation emails to attendees")
+        sendUpdates: z.enum(['all', 'externalOnly', 'none']).optional().default('all').describe("Whether to send cancellation emails to attendees"),
+        confirmed: z.boolean().optional().default(false).describe("Set to true ONLY after the user explicitly confirms deleting this event in chat"),
     });
 
     constructor(private accessToken: string) {
@@ -201,7 +202,10 @@ export class GoogleCalendarDeleteEvent extends StructuredTool {
         this.calendar = getCalenderClient(this.accessToken)
     }
 
-    async _call({ eventId, sendUpdates }: z.infer<typeof this.schema>) {
+    async _call({ eventId, sendUpdates, confirmed }: z.infer<typeof this.schema>) {
+        if (!confirmed) {
+            return `CONFIRMATION_REQUIRED: Ask the user to confirm deleting calendar event "${eventId}" before retrying with confirmed=true.`;
+        }
         try {
             const existingEvent = await this.calendar.events.get({
                 calendarId: 'primary',

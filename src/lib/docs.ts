@@ -318,6 +318,10 @@ export class GoogleDocsFormatDocument extends StructuredTool {
     }
 }
 
+function escapeDriveQueryLiteral(value: string): string {
+    return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+}
+
 export class GoogleDocsSearchDocuments extends StructuredTool {
     name = "google_docs_search_documents";
     description = "Search for Google Docs in the user's Drive by name, content, or other criteria";
@@ -338,18 +342,26 @@ export class GoogleDocsSearchDocuments extends StructuredTool {
 
     async _call({ query, folderId, modifiedAfter, maxResults, orderBy }: z.infer<typeof this.schema>) {
         try {
-            let q = "mimeType='application/vnd.google-apps.document'";
+            let q = "mimeType='application/vnd.google-apps.document' and trashed = false";
 
             if (query) {
-                q += ` and (name contains '${query}' or fullText contains '${query}')`;
+                const escaped = escapeDriveQueryLiteral(query.trim().slice(0, 200));
+                q += ` and (name contains '${escaped}' or fullText contains '${escaped}')`;
             }
 
             if (folderId) {
+                if (!/^[a-zA-Z0-9_-]+$/.test(folderId)) {
+                    return 'Invalid folderId format';
+                }
                 q += ` and '${folderId}' in parents`;
             }
 
             if (modifiedAfter) {
-                q += ` and modifiedTime > '${modifiedAfter}'`;
+                const parsedDate = Date.parse(modifiedAfter);
+                if (Number.isNaN(parsedDate)) {
+                    return 'Invalid modifiedAfter date format';
+                }
+                q += ` and modifiedTime > '${new Date(parsedDate).toISOString()}'`;
             }
 
             const response = await this.drive.files.list({
@@ -388,10 +400,11 @@ export class GoogleDocsShareDocument extends StructuredTool {
 
     schema = z.object({
         documentId: z.string().describe("The ID of the Google Doc to share"),
-        email: z.string().describe("Email address of the person to share with"),
+        email: z.string().email().describe("Email address of the person to share with"),
         role: z.enum(['reader', 'writer', 'commenter']).describe("Permission level for the user"),
         sendNotificationEmail: z.boolean().optional().default(true).describe("Whether to send a notification email"),
-        emailMessage: z.string().optional().describe("Optional message to include in the notification email")
+        emailMessage: z.string().optional().describe("Optional message to include in the notification email"),
+        confirmed: z.boolean().optional().default(false).describe("Set to true ONLY after the user explicitly confirms sharing this document in chat"),
     });
 
     constructor(private accessToken: string) {
@@ -399,7 +412,10 @@ export class GoogleDocsShareDocument extends StructuredTool {
         this.drive = getDriveClient(this.accessToken);
     }
 
-    async _call({ documentId, email, role, sendNotificationEmail, emailMessage }: z.infer<typeof this.schema>) {
+    async _call({ documentId, email, role, sendNotificationEmail, emailMessage, confirmed }: z.infer<typeof this.schema>) {
+        if (!confirmed) {
+            return `CONFIRMATION_REQUIRED: Ask the user to confirm sharing document "${documentId}" with ${email} as ${role} before retrying with confirmed=true.`;
+        }
         try {
             const permission = {
                 type: 'user',
@@ -438,7 +454,8 @@ export class GoogleDocsDeleteDocument extends StructuredTool {
 
     schema = z.object({
         documentId: z.string().describe("The ID of the Google Doc to delete"),
-        permanent: z.boolean().optional().default(false).describe("If true, permanently deletes the file instead of moving to trash")
+        permanent: z.boolean().optional().default(false).describe("If true, permanently deletes the file instead of moving to trash"),
+        confirmed: z.boolean().optional().default(false).describe("Set to true ONLY after the user explicitly confirms deleting this document in chat"),
     });
 
     constructor(private accessToken: string) {
@@ -446,7 +463,10 @@ export class GoogleDocsDeleteDocument extends StructuredTool {
         this.drive = getDriveClient(this.accessToken);
     }
 
-    async _call({ documentId, permanent }: z.infer<typeof this.schema>) {
+    async _call({ documentId, permanent, confirmed }: z.infer<typeof this.schema>) {
+        if (!confirmed) {
+            return `CONFIRMATION_REQUIRED: Ask the user to confirm ${permanent ? 'permanently deleting' : 'moving to trash'} document "${documentId}" before retrying with confirmed=true.`;
+        }
         try {
             if (permanent) {
                 await this.drive.files.delete({
