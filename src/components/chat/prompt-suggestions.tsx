@@ -23,14 +23,14 @@ const PromptSuggestions = ({ onSuggestionClick }: { onSuggestionClick: (content:
     ];
 
     return (
-        <div className="w-full flex flex-col items-center justify-center gap-6 mb-40">
+        <div className="w-full flex flex-col items-center justify-center gap-4 sm:gap-6 mb-4 sm:mb-24">
             <div className="w-full flex items-center justify-center flex-col gap-2">
-                <Image src="/logo.png" alt="Rage AI" width={140} height={140} />
-                <div className="text-zinc-400 text-sm text-center">
+                <Image src="/logo.png" alt="Rage AI" width={120} height={120} className="w-20 h-20 sm:w-28 sm:h-28 object-contain" />
+                <div className="text-zinc-400 text-xs sm:text-sm text-center px-2">
                     Ask Rage AI anything — paste URLs, YouTube links, GitHub repos, or automate Google Workspace
                 </div>
             </div>
-            <div className="grid w-full grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid w-full grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 {SUGGESTIONS.map((suggestion, index) => {
                     const IconComponent = suggestion.icon;
                     return (
@@ -38,7 +38,7 @@ const PromptSuggestions = ({ onSuggestionClick }: { onSuggestionClick: (content:
                             key={index}
                             onClick={() => onSuggestionClick(suggestion.text)}
                             className="group bg-[#141010] hover:bg-[#191313] border border-white/[0.07]
-                         px-4 py-4 rounded-xl cursor-pointer
+                         px-3.5 sm:px-4 py-3 sm:py-4 rounded-xl cursor-pointer
                          transition-all duration-200
                          hover:shadow-lg hover:border-red-500/35"
                         >
@@ -46,7 +46,7 @@ const PromptSuggestions = ({ onSuggestionClick }: { onSuggestionClick: (content:
                                 <div className="flex-shrink-0 p-2 bg-red-500/15 rounded-lg group-hover:bg-red-500/25 transition-colors">
                                     <IconComponent className="w-4 h-4 text-red-400" />
                                 </div>
-                                <p className="text-zinc-200 group-hover:text-white font-medium text-sm">
+                                <p className="text-zinc-200 group-hover:text-white font-medium text-xs sm:text-sm">
                                     {suggestion.text}
                                 </p>
                             </div>

@@ -23,7 +23,13 @@ type GoogleApp = {
     lastUsedAt?: Date
 }
 
-export default function EnhancedAppsSidebar({ isOpen = true }: { isOpen?: boolean }) {
+export default function EnhancedAppsSidebar({
+    isOpen = true,
+    onCloseMobile,
+}: {
+    isOpen?: boolean
+    onCloseMobile?: () => void
+}) {
     const queryClient = useQueryClient()
     const [isCollapsed, setIsCollapsed] = useState(false)
     const [connectingAppId, setConnectingAppId] = useState<string | null>(null)
@@ -167,7 +173,7 @@ export default function EnhancedAppsSidebar({ isOpen = true }: { isOpen?: boolea
 
     if (isLoading) {
         return (
-            <div className="w-64 h-screen bg-[#100c0c] border-l border-white/[0.07] transition-all duration-300 z-30">
+            <div className="w-72 sm:w-64 h-[calc(100dvh-3.5rem)] md:h-[100dvh] bg-[#100c0c] border-l border-white/[0.07] transition-all duration-300 z-30">
                 <div className="flex items-center justify-center h-full">
                     <Loader2 className="w-7 h-7 animate-spin text-zinc-500" />
                 </div>
@@ -177,8 +183,8 @@ export default function EnhancedAppsSidebar({ isOpen = true }: { isOpen?: boolea
 
     return (
         <div className={cn(
-            "bg-[#100c0c] h-screen border-l border-white/[0.07] transition-all duration-300 z-30 flex flex-col",
-            isCollapsed ? "w-16" : "w-76"
+            "bg-[#100c0c] h-[calc(100dvh-3.5rem)] md:h-[100dvh] border-l border-white/[0.07] transition-all duration-300 z-30 flex flex-col",
+            isCollapsed ? "w-16" : "w-76 max-w-[88vw]"
         )}>
             <div className="flex flex-col h-full">
                 {/* Header */}
@@ -195,7 +201,13 @@ export default function EnhancedAppsSidebar({ isOpen = true }: { isOpen?: boolea
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setIsCollapsed(!isCollapsed)}
+                            onClick={() => {
+                                if (onCloseMobile) {
+                                    onCloseMobile()
+                                } else {
+                                    setIsCollapsed(!isCollapsed)
+                                }
+                            }}
                             className="text-zinc-400 hover:text-white hover:bg-white/5 h-8 w-8 p-0"
                         >
                             <X className={cn("w-4 h-4 transition-transform", isCollapsed && "rotate-45")} />

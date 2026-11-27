@@ -137,7 +137,7 @@ function SignInContent() {
       : null
 
   return (
-    <div className="min-h-screen bg-[#0b0909] text-white relative overflow-hidden flex flex-col justify-between px-6 py-8">
+    <div className="min-h-[100dvh] bg-[#0b0909] text-white relative overflow-hidden flex flex-col justify-between px-4 sm:px-6 py-5 sm:py-8">
       {/* Ambient crimson glow + architectural grid */}
       <div
         aria-hidden="true"
@@ -153,7 +153,7 @@ function SignInContent() {
       <header className="relative z-10 mx-auto w-full max-w-5xl flex items-center justify-between">
         <Link
           href="/"
-          className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-[#141010]/90 px-4 py-1.5 text-xs font-medium text-zinc-300 hover:border-red-500/40 hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#141010]/90 px-3.5 py-1.5 text-xs font-medium text-zinc-300 hover:border-red-500/40 hover:text-white transition-colors"
         >
           <RageLogo variant="red" className="h-4 w-4" />
           <span>Back to Rage AI</span>
@@ -166,20 +166,20 @@ function SignInContent() {
       </header>
 
       {/* Main Split Container */}
-      <main className="relative z-10 mx-auto w-full max-w-5xl py-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <main className="relative z-10 mx-auto w-full max-w-5xl py-6 sm:py-10 grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-10 items-center">
         {/* Left Pitch + Live Prompt Preview */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="lg:col-span-6 space-y-6 text-center lg:text-left"
+          className="lg:col-span-6 space-y-4 sm:space-y-6 text-center lg:text-left"
         >
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-red-400">
+          <div className="space-y-2.5 sm:space-y-3">
+            <div className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-red-400">
               <Sparkles className="h-3.5 w-3.5" />
               <span>Workspace Agent</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white leading-[1.06]">
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.06]">
               Welcome to{" "}
               <span className="bg-gradient-to-r from-white via-red-200 to-red-500 bg-clip-text text-transparent">
                 Rage AI

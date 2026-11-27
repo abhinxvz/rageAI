@@ -326,8 +326,8 @@ export default function LandingPage() {
         className="pointer-events-none fixed inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(220,38,38,0.2),rgba(127,29,29,0.06)_55%,transparent_100%)] z-0"
       />
 
-      {/* Minimal Reference-Style Header: Centered Logo Mark + Subtle Sign-In */}
-      <header className="relative z-20 mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
+      {/* Minimal Reference-Style Header: Centered Logo Mark + Mobile & Desktop Actions */}
+      <header className="relative z-20 mx-auto flex h-16 sm:h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
         <div className="hidden sm:flex items-center gap-5 text-[11px] font-medium text-zinc-500">
           <a href="#features" className="hover:text-zinc-200 transition-colors">
             Capabilities
@@ -342,13 +342,13 @@ export default function LandingPage() {
 
         <Link
           href="/"
-          className="mx-auto sm:mx-0 flex items-center justify-center h-8 w-8 rounded-lg bg-white text-[#0b0909] shadow-lg shadow-red-950/40 hover:scale-105 transition-transform"
+          className="flex items-center justify-center h-8 w-8 rounded-lg bg-white text-[#0b0909] shadow-lg shadow-red-950/40 hover:scale-105 transition-transform"
           aria-label="Rage AI Home"
         >
           <RageLogo variant="red" className="h-5 w-5" />
         </Link>
 
-        <div className="hidden sm:flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <Link
             href="/auth/signin"
             className="text-[11px] font-medium text-zinc-400 hover:text-white transition-colors"
@@ -366,16 +366,16 @@ export default function LandingPage() {
 
       <main className="relative z-10">
         {/* Hero Section */}
-        <section className="relative mx-auto max-w-6xl px-6 pt-10 pb-24 text-center">
+        <section className="relative mx-auto max-w-6xl px-4 sm:px-6 pt-6 sm:pt-10 pb-16 sm:pb-24 text-center">
           <HeroCrystalShards />
 
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="relative z-10 mx-auto max-w-2xl space-y-5"
+            className="relative z-10 mx-auto max-w-2xl space-y-4 sm:space-y-5"
           >
-            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl md:text-[54px] leading-[1.08]">
+            <h1 className="text-[34px] font-semibold tracking-tight text-white sm:text-5xl md:text-[54px] leading-[1.08]">
               Run your workspace
               <br />
               <span className="bg-gradient-to-r from-white via-red-100 to-red-400 bg-clip-text text-transparent">
@@ -411,37 +411,43 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15 }}
-            className="relative z-10 mx-auto mt-14 max-w-4xl pt-4"
+            className="relative z-10 mx-auto mt-10 sm:mt-14 max-w-4xl pt-2 sm:pt-4"
           >
-            <div className="grid grid-cols-1 md:grid-cols-12 items-center gap-8">
-              {/* Left Minimalist Selector */}
-              <div className="md:col-span-4 text-left space-y-2.5 pl-2">
-                {CAPABILITIES.map((cap) => {
-                  const isActive = cap.id === activeCap
-                  return (
-                    <button
-                      key={cap.id}
-                      type="button"
-                      onClick={() => setActiveCap(cap.id)}
-                      className={`w-full flex items-center gap-2 text-left text-xs transition-colors cursor-pointer ${
-                        isActive ? "text-white font-medium" : "text-zinc-600 hover:text-zinc-300"
-                      }`}
-                    >
-                      <span
-                        className={`text-[9px] transition-opacity ${
-                          isActive ? "text-red-500 opacity-100" : "opacity-0"
+            <div className="grid grid-cols-1 md:grid-cols-12 items-center gap-6 md:gap-8">
+              {/* Left Minimalist Selector (pill wrap on mobile, vertical list on md+) */}
+              <div className="md:col-span-4 text-center md:text-left space-y-2.5 md:pl-2">
+                <div className="flex flex-wrap justify-center md:flex-col md:items-start gap-2 md:gap-2.5">
+                  {CAPABILITIES.map((cap) => {
+                    const isActive = cap.id === activeCap
+                    return (
+                      <button
+                        key={cap.id}
+                        type="button"
+                        onClick={() => setActiveCap(cap.id)}
+                        className={`inline-flex md:w-full items-center gap-1.5 md:gap-2 rounded-full md:rounded-none border md:border-0 px-3 py-1 md:p-0 text-left text-xs transition-colors cursor-pointer ${
+                          isActive
+                            ? "border-red-500/40 bg-red-500/10 md:bg-transparent text-white font-medium"
+                            : "border-white/10 text-zinc-500 md:text-zinc-600 hover:text-zinc-300"
                         }`}
                       >
-                        &#9654;
-                      </span>
-                      <span>{cap.label}</span>
-                      {cap.badge && (
-                        <span className="text-[9px] text-zinc-600 font-normal">({cap.badge})</span>
-                      )}
-                    </button>
-                  )
-                })}
-                <p className="pt-3 pl-4 text-[11px] leading-relaxed text-zinc-500 max-w-[240px]">
+                        <span
+                          className={`hidden md:inline text-[9px] transition-opacity ${
+                            isActive ? "text-red-500 opacity-100" : "opacity-0"
+                          }`}
+                        >
+                          &#9654;
+                        </span>
+                        <span>{cap.label}</span>
+                        {cap.badge && (
+                          <span className="hidden md:inline text-[9px] text-zinc-600 font-normal">
+                            ({cap.badge})
+                          </span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+                <p className="pt-2 md:pt-3 md:pl-4 text-[11px] leading-relaxed text-zinc-500 max-w-xs mx-auto md:mx-0 md:max-w-[240px]">
                   {activeCapability.detail}
                 </p>
               </div>
@@ -804,11 +810,11 @@ export default function LandingPage() {
       </main>
 
       {/* Editorial Reference Footer */}
-      <footer className="relative z-10 bg-[#050404] border-t border-white/[0.06] pt-20 pb-12">
-        <div className="mx-auto max-w-5xl px-6 space-y-16">
+      <footer className="relative z-10 bg-[#050404] border-t border-white/[0.06] pt-14 sm:pt-20 pb-10 sm:pb-12">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 space-y-10 sm:space-y-16">
           {/* Upper Oversized Statement + Red Inline Accents */}
-          <div className="max-w-2xl space-y-6">
-            <h2 className="text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[0.96]">
+          <div className="max-w-2xl space-y-4 sm:space-y-6">
+            <h2 className="text-3xl sm:text-6xl font-bold tracking-tight text-white leading-[0.96]">
               Let&apos;s automate
               <br />
               something <span className="text-red-500">great.</span>
@@ -896,7 +902,7 @@ export default function LandingPage() {
           </div>
 
           {/* 3-Column Horizontal Divider Strip */}
-          <div className="flex items-center gap-4 sm:gap-8 text-[11px] font-medium text-zinc-200">
+          <div className="flex items-center gap-2.5 sm:gap-8 text-[10px] sm:text-[11px] font-medium text-zinc-200">
             <span className="shrink-0">Google AI Studio</span>
             <span className="h-px flex-1 bg-white/15" />
             <span className="shrink-0 text-red-400">NVIDIA NIM</span>

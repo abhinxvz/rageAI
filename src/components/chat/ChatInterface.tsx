@@ -394,30 +394,30 @@ export default function ChatInterface({ threadId }: { threadId?: string }) {
     }, [keys, model, versusModel])
 
     return (
-        <div className="relative mx-auto max-w-5xl px-6 min-h-[100dvh]">
-            <div className="flex min-h-[100dvh] flex-col">
+        <div className="relative mx-auto max-w-5xl px-3 sm:px-6 h-[calc(100dvh-3.5rem)] md:h-[100dvh]">
+            <div className="flex h-full flex-col">
                 <div
                     ref={viewportRef}
                     className={twMerge(
-                        "flex-1 max-h-[80vh] pr-2 -mr-2 py-12 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent",
+                        "flex-1 min-h-0 pr-1 sm:pr-2 -mr-1 sm:-mr-2 py-4 sm:py-10 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent",
                         messages?.length > 0 && "overflow-y-auto"
                     )}
                     aria-label="Messages"
                 >
                     {messages?.length === 0 ? (
-                        <div className="h-screen flex items-center">
+                        <div className="min-h-full flex items-center py-4">
                             <PromptSuggestions onSuggestionClick={handleSubmit} />
                         </div>
                     ) : (
-                        <div className="mt-2 space-y-6">
+                        <div className="mt-2 space-y-4 sm:space-y-6">
                             {messages.map((m) => (
                                 <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
                                     {m.role === "user" ? (
-                                        <div className="prose prose-sm prose-neutral rounded-2xl px-4 py-3 text-sm leading-relaxed bg-gradient-to-r from-[#dc2626] to-[#b91c1c] max-w-[70%] text-white prose-a:text-white shadow-lg shadow-red-950/35">
+                                        <div className="prose prose-sm prose-neutral rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-sm leading-relaxed bg-gradient-to-r from-[#dc2626] to-[#b91c1c] max-w-[88%] sm:max-w-[70%] text-white prose-a:text-white shadow-lg shadow-red-950/35">
                                             <MarkdownRenderer content={m.content} />
                                         </div>
                                     ) : (
-                                        <div className={cn("w-full space-y-2.5", m.versus ? "max-w-full" : "max-w-[85%]")}>
+                                        <div className={cn("w-full space-y-2.5", m.versus ? "max-w-full" : "max-w-[95%] sm:max-w-[85%]")}>
                                             {/* Failover notice */}
                                             {m.failover && (
                                                 <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] text-amber-200">

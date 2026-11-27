@@ -56,6 +56,9 @@ export function ChatSidebar({
 
   const handleNewChat = () => {
     router.push(`/chat`)
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      onToggle()
+    }
   }
 
   const truncateTitle = (title: string, maxLength: number = 30) => {
@@ -65,9 +68,9 @@ export function ChatSidebar({
 
 
   return (
-    <div className="w-full h-screen bg-[#100c0c] flex flex-col">
+    <div className="w-full h-[calc(100dvh-3.5rem)] md:h-[100dvh] bg-[#100c0c] flex flex-col">
       {/* Header */}
-      <div className="flex-shrink-0 px-5 py-5 space-y-5 border-b border-white/[0.07]">
+      <div className="flex-shrink-0 px-5 py-4 md:py-5 space-y-4 md:space-y-5 border-b border-white/[0.07]">
         <div className="flex items-center justify-center gap-3 py-1 -ml-3">
           <Image src="/logo.png" alt="Rage AI" width={32} height={32} className="rounded-lg" />
           <span className="text-xl font-['TRTCENZO'] text-white">Rage AI</span>
@@ -120,7 +123,12 @@ export function ChatSidebar({
                   ? "bg-red-500/10 border border-red-500/30"
                   : "hover:bg-white/5 border border-transparent"
               )}
-              onClick={() => router.push(`/chat/${conversation.threadId}`)}
+              onClick={() => {
+                router.push(`/chat/${conversation.threadId}`)
+                if (typeof window !== "undefined" && window.innerWidth < 768) {
+                  onToggle()
+                }
+              }}
             >
               <div className="flex-1 min-w-0">
                 <p className={cn(

@@ -157,20 +157,20 @@ export function Composer({
     const isDisabled = isMessageLimitReached || isLoading
 
     return (
-        <div className="sticky bottom-0 z-10 pt-6 pb-4">
+        <div className="sticky bottom-0 z-10 pt-2 sm:pt-6 pb-2 sm:pb-4">
             <div className="relative w-full">
                 {/* Glow effect */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-red-500/20 via-rose-500/15 to-red-500/20 rounded-3xl blur-xl opacity-50" />
+                <div className="hidden sm:block absolute -inset-1 bg-gradient-to-r from-red-500/20 via-rose-500/15 to-red-500/20 rounded-3xl blur-xl opacity-50" />
 
                 {/* Main container */}
                 <div className="relative w-full rounded-2xl border border-white/10 bg-[#120d0d]/95 backdrop-blur-2xl shadow-2xl overflow-hidden">
                     {/* Versus banner when active */}
                     {versusMode && (
-                        <div className="px-5 py-2.5 bg-red-500/[0.08] border-b border-red-500/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <div className="px-3 sm:px-5 py-2 sm:py-2.5 bg-red-500/[0.08] border-b border-red-500/20 flex flex-wrap items-center justify-between gap-2 text-xs">
                             <div className="flex items-center gap-2 text-red-200">
                                 <Columns2 className="h-3.5 w-3.5 text-red-400" />
-                                <span className="font-medium">Side-by-Side Versus Mode</span>
-                                <span className="text-zinc-400">Compare</span>
+                                <span className="font-medium">Versus Mode</span>
+                                <span className="hidden sm:inline text-zinc-400">Side-by-Side Compare</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="text-zinc-400">against:</span>
@@ -179,7 +179,7 @@ export function Composer({
                                     value={versusModel}
                                     onChange={(e) => setVersusModel(e.target.value)}
                                     disabled={isLoading}
-                                    className="rounded-lg bg-[#0b0909] border border-white/15 px-2.5 py-1 text-xs text-white focus:outline-none focus:border-red-500/50"
+                                    className="max-w-[165px] sm:max-w-none rounded-lg bg-[#0b0909] border border-white/15 px-2 py-1 text-xs text-white focus:outline-none focus:border-red-500/50"
                                 >
                                     {availableModels.map((m) => (
                                         <option key={m.id} value={m.id}>
@@ -192,7 +192,7 @@ export function Composer({
                     )}
 
                     {/* Input area */}
-                    <div className="flex items-end gap-2.5 p-5">
+                    <div className="flex items-end gap-2 p-3 sm:p-5">
                         <Textarea
                             ref={textareaRef}
                             value={input}
@@ -209,16 +209,16 @@ export function Composer({
                                         ? "Processing..."
                                         : isListening
                                             ? "Listening... speak your command"
-                                            : "Message Rage AI, paste a URL / YouTube link, or ask for a briefing..."
+                                            : "Message Rage AI, paste a URL / YouTube link..."
                             }
                             aria-label="Message"
                             disabled={isDisabled}
                             className={cn(
-                                "flex-1 min-h-[48px] resize-none border-0 bg-transparent text-white text-[15px] placeholder:text-gray-500 focus-visible:ring-0 disabled:opacity-50 disabled:cursor-not-allowed",
+                                "flex-1 min-h-[42px] sm:min-h-[48px] resize-none border-0 bg-transparent text-white text-sm sm:text-[15px] placeholder:text-gray-500 focus-visible:ring-0 disabled:opacity-50 disabled:cursor-not-allowed",
                                 "scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
                             )}
                             style={{
-                                height: '48px',
+                                height: '44px',
                                 maxHeight: '160px',
                                 overflowY: input.split('\n').length > 6 ? 'auto' : 'hidden'
                             }}
@@ -231,7 +231,7 @@ export function Composer({
                             onClick={toggleVoiceInput}
                             disabled={isDisabled}
                             className={cn(
-                                "flex h-12 w-11 items-center justify-center rounded-xl border transition-all cursor-pointer",
+                                "flex h-10 w-10 sm:h-12 sm:w-11 shrink-0 items-center justify-center rounded-xl border transition-all cursor-pointer",
                                 isListening
                                     ? "border-red-500 bg-red-500/20 text-red-300 animate-pulse"
                                     : "border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white hover:border-red-500/35"
@@ -245,22 +245,22 @@ export function Composer({
                             onClick={handleSend}
                             disabled={isDisabled || !input.trim()}
                             className={cn(
-                                "relative flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-200",
+                                "relative flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-200",
                                 !isDisabled && input.trim()
                                     ? "bg-[#dc2626] text-white hover:bg-[#b91c1c] shadow-lg shadow-red-950/50 hover:scale-105 cursor-pointer"
                                     : "bg-white/5 text-zinc-600 cursor-not-allowed"
                             )}
                         >
                             {isLoading ? (
-                                <Loader2 className="h-5 w-5 animate-spin" />
+                                <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                             ) : (
-                                <ArrowUp className="h-5 w-5" />
+                                <ArrowUp className="h-4 w-4 sm:h-5 sm:w-5" />
                             )}
                         </button>
                     </div>
 
                     {/* Controls bar */}
-                    <div className="px-5 pb-4 flex flex-wrap items-center gap-2 border-t border-white/5 pt-4">
+                    <div className="px-3 sm:px-5 pb-3 sm:pb-4 flex flex-wrap items-center gap-1.5 sm:gap-2 border-t border-white/5 pt-2.5 sm:pt-4">
                         <ModelSelector
                             model={model}
                             onChange={setModel}
